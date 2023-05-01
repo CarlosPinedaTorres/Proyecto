@@ -1,0 +1,7 @@
+.imagen {
+  width: 180px;
+  aspect-ratio: auto 180 / 220;
+  height: 220px;
+  overflow-clip-margin: content-box;
+  overflow: clip;
+}

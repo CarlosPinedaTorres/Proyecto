@@ -1,0 +1,12 @@
+node_modules/
+data/
+*.pyc
+*.log
+*.sqlite3
+__pycache__/
+*.pyo
+front/node_modules/
+back/users/migrations/
+back/games/migrations/
+__pycache__/
+

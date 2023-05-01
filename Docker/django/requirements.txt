@@ -1,0 +1,11 @@
+dj-database-url==0.5.0
+Django==4.0.8
+psycopg2-binary==2.9.3
+wheel==0.38.1
+whitenoise==6.0.0
+djangorestframework
+django-cors-headers
+python-decouple
+Pillow
+psycopg2
+djangorestframework-simplejwt

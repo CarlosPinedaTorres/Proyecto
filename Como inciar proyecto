@@ -1,0 +1,8 @@
+# Proyecto
+Primero antes de hacer un compose up
+entra en el compose.yml y en la linea 36 donde hay esto  - ./front/node_modules:/app/node_modules
+deberas de colocar solamente esto /app/node_modules
+Despues ejecutar el comando del makefile llamado start y el django-migrate.
+Para usar el login de react que tengo en mi proyecto tendras que crearte un user en django 
+accedes a la termianl del contenedor con el comando terminal-servidorweb
+y alli usas el comando createsuperuser.

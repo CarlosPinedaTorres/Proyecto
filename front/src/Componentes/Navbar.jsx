@@ -1,52 +1,67 @@
-import React from "react";
+import {React,useContext} from "react";
 import { NavLink } from "react-router-dom";
-
+import { Contexto } from "../Context/Contexto";
 export const Navbar = () => {
+  const {user,logoutUser}=useContext(Contexto)
   return (
-    <div class="w-100">
-      <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
+    <div className="w-100">
+      <nav className="navbar navbar-expand-sm bg-dark navbar-dark">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="#">
             GameMasters
           </a>
           <button
-            class="navbar-toggler"
+            className="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#collapsibleNavbar"
           >
-            <span class="navbar-toggler-icon"></span>
+            <span className="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav">
-              <li class="nav-item">
+          <div className="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul className="navbar-nav">
+              <li className="nav-item">
               <NavLink className="nav-link" to="/home">
                 Inicio
               </NavLink>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">
+              <li className="nav-item">
+                <a className="nav-link" href="#">
                   Sobre Nostros
                 </a>
               </li>
 
             </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
+            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+              {!user &&
+          <li className="nav-item">
+            
             <NavLink className="nav-link" to="/login">
               Login
             </NavLink>
+           
           </li>
-          <li class="nav-item">
+          }
+        {!user  &&
+          <li className="nav-item">
             <NavLink className="nav-link" to="/registrar">
-              Registrar
+                Sign up
             </NavLink>
-          </li>
-          <li class="nav-item">
-            <NavLink className="nav-link" to="/logout">
-              logout
+          </li> 
+          }
+          {user &&
+          <li className="nav-item">
+            <NavLink onClick={logoutUser} className="nav-link" to="/login">
+              Logout
             </NavLink>
+          </li>}
+          {user &&
+          <li>
+          
+          <span className="nav-link text-white">Bienvenido, {user.username}!</span>
+
           </li>
+        }
         </ul>
 
           </div>

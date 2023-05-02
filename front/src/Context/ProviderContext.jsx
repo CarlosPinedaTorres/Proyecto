@@ -1,10 +1,10 @@
 import { Contexto } from "./Contexto";
 import React, { useEffect, useState } from "react";
 import { getGames } from "../Services/Apiservices";
-import axiosInstance from "../Services/axios";
 import jwt_decode from "jwt-decode"
 import { useNavigate } from "react-router-dom";
 export const ProviderContext = ({ children }) => {
+
 
   //USER
 
@@ -34,9 +34,7 @@ export const ProviderContext = ({ children }) => {
     }else{
       alert('Algo ha salido mal(login)')
     }
-    // console.log('data:',data)
-    // console.log('response:',response)
-
+ 
   }
   //logout
   const logoutUser=()=>{
@@ -49,8 +47,6 @@ export const ProviderContext = ({ children }) => {
 //refresh tokens
 const updateTokens=async ()=>{
   console.log('update')
-  // const tokens = JSON.parse(localStorage.getItem('authTokens'));
-  // const refreshToken = tokens.refresh
   let response= await fetch('http://localhost:8000/api/token/refresh/',{
     method: 'POST',
     headers:{
@@ -140,7 +136,8 @@ const Registrar=async(e)=>{
     logoutUser:logoutUser,
     test:test,
     authTokens:authTokens,
-    Registrar:Registrar
+    Registrar:Registrar,
+
   
   }
   return <Contexto.Provider value={contextData}>{children}</Contexto.Provider>;

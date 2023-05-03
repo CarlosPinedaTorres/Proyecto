@@ -10,6 +10,7 @@ urlpatterns=[
     path('games/list/',Gameslist.as_view(),name='list-games'),
     path('games/',getJuegos,name='games-create'),
     path("api/upload/",TestUploadImage.as_view(),name='Subir'),
+    path("email-verify/",VerifyEmail.as_view(),name='email-verify'),
 ]
 # urlpatterns+=router.urls
 

@@ -15,7 +15,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenViewBase
 from rest_framework.decorators import *
-from users.models import *
+from users.models import NewUser
+from games.utils import Util
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+import jwt
+from django.conf import settings
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -93,19 +98,46 @@ class Gameslist(generics.ListCreateAPIView):
 
 
 
-class UserRegisterView(CreateAPIView):
+class UserRegisterView(generics.GenericAPIView):
     serializer_class = UserRegisterSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def post(self, request):
+        user = request.data
+        serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        data = {
-            'email': user.email,
-            'username': user.username,
-            'password':request.data.get('password')
-        }
-        return Response(data, status=status.HTTP_201_CREATED)
+        serializer.save()
+        user_data = serializer.data
+        user = NewUser.objects.get(email=user_data['email'])
+        token = RefreshToken.for_user(user).access_token
+        current_site = get_current_site(request).domain
+        relativeLink = reverse('email-verify')
+        absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
+        email_body = 'Hi '+user.username + \
+            ' Use the link below to verify your email \n' + absurl
+        data = {'email_body': email_body, 'to_email': user.email,
+                'email_subject': 'Verify your email'}
+
+        Util.send_email(data)
+        return Response(user_data, status=status.HTTP_201_CREATED)
+    
+class VerifyEmail(generics.GenericAPIView):
+    def get(self,request):
+        token=request.GET.get('token')
+        try:
+            payload=jwt.decode(token,settings.SECRET_KEY, algorithms=["HS256"])
+            
+            user=NewUser.objects.get(id=payload['user_id'])
+            if not user.is_verified:
+                user.is_verified=True
+                user.save()
+            return Response({'email':'Successfully activated'}, status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError as identifier:
+            return Response({'error':'Activation Expired'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as identifier:
+            return Response({'error':'INvalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class BlacklistTokenView(APIView):
     permission_classes = [AllowAny]
     def post(self,request):

@@ -1,15 +1,16 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from users.models import NewUser
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     email=serializers.EmailField()
     username=serializers.CharField(max_length=150)
     password=serializers.CharField(write_only=True)
+    is_verified =serializers.BooleanField(default=False)
     class Meta:
-        model=User
-        fields=('id','email','username','password')
+        model=NewUser
+        fields=('id','email','username','password','is_verified')
     def create(self, validated_data):
-        user=User.objects.create_user(
+        user=NewUser.objects.create_user(
             email=validated_data["email"],
             username=validated_data['username'],
             password=validated_data['password']

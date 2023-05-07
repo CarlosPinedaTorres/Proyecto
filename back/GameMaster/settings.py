@@ -35,6 +35,7 @@ AUTH_USER_MODEL = 'users.NewUser'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django_extensions',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

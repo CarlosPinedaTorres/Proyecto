@@ -5,7 +5,7 @@ export const Navbar = () => {
   const {user,logoutUser}=useContext(Contexto)
   return (
     <div className="w-100">
-      <nav className="navbar navbar-expand-sm bg-dark navbar-dark">
+      <nav className="navbar navbar-expand-sm bg-secondary navbar-secondary">
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
             GameMasters

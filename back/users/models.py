@@ -52,14 +52,14 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
 
 
-class Vendedor(models.Model):
+class Logueado(models.Model):
     user=models.OneToOneField(NewUser,on_delete=models.CASCADE)
-    nombre_empresa=models.CharField(max_length=100)
     telefono=models.CharField(max_length=100 ,null=True)
-    direccion=models.CharField(max_length=100, null=True)
+    pais=models.CharField(max_length=100, null=True)
+    dinero=models.DecimalField(max_digits=8, decimal_places=2)
     class Meta:
-        verbose_name='Vendedor'
-        verbose_name_plural = 'Vendedores'
-
-
+        verbose_name='Logueado'
+        verbose_name_plural ='Logueado'
+    def __str__(self):
+        return self.user.username
 

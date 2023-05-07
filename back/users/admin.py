@@ -1,15 +1,9 @@
-
-# from users.models import NewUser
-# from django.contrib.auth.admin import UserAdmin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.forms import TextInput, Textarea, CharField
 from django import forms
 from django.db import models
-from users.models import NewUser
-
-# from django.contrib.auth.models import User
-from users.models import Vendedor
+from users.models import NewUser,Logueado
 class UserAdminConfig(UserAdmin):
     model = NewUser
     search_fields = ('email', 'username', 'first_name',)
@@ -35,7 +29,7 @@ class UserAdminConfig(UserAdmin):
 
 
 admin.site.register(NewUser, UserAdminConfig)
-@admin.register(Vendedor)
-class VendedorAdmin(admin.ModelAdmin):
-    list_display=('id','user','nombre_empresa','telefono','direccion')
+@admin.register(Logueado)
+class LogueadoAdmin(admin.ModelAdmin):
+    list_display=('id','user','telefono','pais','dinero')
 

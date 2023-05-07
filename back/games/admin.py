@@ -3,19 +3,19 @@ from .models import *
 # Register your models here.
 @admin.register(Juegos)
 class GamesAdmin(admin.ModelAdmin):
-    list_display=('id','nombre',)
+    list_display=('id','nombre','vendedor')
 @admin.register(Desarrollador)
 class DesarrolladorAdmin(admin.ModelAdmin):
-    pass
+    list_display=('id','nombre',)
 @admin.register(Genero)
 class GeneroAdmin(admin.ModelAdmin):
-    pass
+    list_display=('id','nombre',)
 @admin.register(Plataformas)
 class PlataformasAdmin(admin.ModelAdmin):
-    pass
+    list_display=('id','nombre',)
 @admin.register(Idiomas)
 class IdiomasAdmin(admin.ModelAdmin):
-    pass
+    list_display=('id','nombre',)
 @admin.register(Prueba)
 class PruebaAdmin(admin.ModelAdmin):
     pass

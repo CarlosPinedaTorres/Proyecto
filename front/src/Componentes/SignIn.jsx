@@ -3,16 +3,22 @@ import { Navbar } from "./Navbar";
 import { useState,useContext } from "react";
 import { Contexto } from "../Context/Contexto";
 import { useNavigate} from "react-router-dom";
+import Modal from 'react-modal'
 export const SignIn=()=>{
   let {loginUser,user}=useContext(Contexto)
-  let navigate=useNavigate()
-
+  // let navigate=useNavigate()
+// const [modalIsOpen, setModalIsOpen] = useState(false)
 console.log(user)
-  
+Modal.setAppElement('#root');
 
   return (
     <>
     <Navbar/>
+    {/* <Modal isOpen={modalIsOpen}>
+  <h2>Título del modal</h2>
+  <p>Contenido del modal</p>
+  <button onClick={() => setModalIsOpen(false)}>Cerrar modal</button>
+</Modal> */}
     <div className=" vh-100 d-flex justify-content-center align-items-center">
   <div className="container">
     <div className="row d-flex justify-content-center">
@@ -34,6 +40,7 @@ console.log(user)
               {/* <p className="small"><a className="text-primary" href="forget-password.html">Forgot password?</a></p> */}
               <div className="d-grid">
                 <button className="btn btn-outline-dark" type="submit">Login</button>
+                {/* onClick={()=>setModalIsOpen(true)} */}
               </div>
             </form>
             <div>

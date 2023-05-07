@@ -5,8 +5,10 @@ start:
 stop:
 	docker compose down
 django-migrate:
-	docker exec -it servidorweb python manage.py makemigrations
-	docker exec -it servidorweb python manage.py migrate
+    docker exec -it servidorweb python manage.py makemigrations users
+    docker exec -it servidorweb python manage.py migrate users
+    docker exec -it servidorweb python manage.py makemigrations users
+    docker exec -it servidorweb python manage.py migrate users	
 terminal-servidorweb:
 	docker exec -it servidorweb /bin/bash
 lsresources:

@@ -6,11 +6,15 @@ from games.views import *
 # router.register('api/games',GamesViewSet,'games')
 # router.register('api/plataformas',PlataformasViewSet,'plataformas')
 urlpatterns=[
-    # path('<int:pk>/',GamesDetail.as_view(),name='detailcreate'),
-    path('games/list/',Gameslist.as_view(),name='list-games'),
-    path('games/',getJuegos,name='games-create'),
+    path("plataforma/upload/",UploadPlataforma.as_view(),name='plataforma-upload'),
+    path("game/upload/",UploadNewGame.as_view(),name='game-upload'),
     path("api/upload/",TestUploadImage.as_view(),name='Subir'),
     path("email-verify/",VerifyEmail.as_view(),name='email-verify'),
+    path("plataformas/",PlataformasView.as_view(),name='plataformas'),
+    path("generos/",GenerosView.as_view(),name='generos'),
+    path("idiomas/",IdiomasView.as_view(),name='idiomas'),
+    path("myGames/",getMyGames,name='mygames'),
+    
 ]
 # urlpatterns+=router.urls
 

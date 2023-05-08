@@ -47,7 +47,7 @@ export const ProviderContext = ({ children }) => {
         setAuthTokens(data)
         setUser(jwt_decode(data.access))
         localStorage.setItem('authTokens',JSON.stringify(data))
-        navigate("/myGames")
+        navigate("/mygames")
     }else{
       alert('Algo ha salido mal(login)')
     }
@@ -198,6 +198,42 @@ const uploadGame = async (e) => {
        }
 
 //
+///MYGAMES
+const [myGamesUser, setmyGamesUser] = useState([])
+      const myGames=async()=>{
+        let response=await fetch("http://127.0.0.1:8000/myGames/",{
+          method:'GET',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+ String(authTokens.access)
+          }
+
+        })
+        let data = await response.json()
+        let gamesWithImages = data.map(game => {
+          if (game.image) {
+            // Convertir la imagen en una URL utilizable
+            const url_portada = URL.createObjectURL(game.url_portada)
+            return {...game, url_portada}
+          } else {
+            return game
+          }
+        })
+       
+        setmyGamesUser(gamesWithImages)
+
+      }
+
+
+
+
+
+
+
+
+/////////
+
+
   let contextData={
     loginUser:loginUser,
     // games:games,
@@ -215,7 +251,9 @@ const uploadGame = async (e) => {
     uploadGame:uploadGame,
     handlePlataformasChange:handlePlataformasChange,
     handleGenerosChange:handleGenerosChange,
-    handleIdiomasChange:handleIdiomasChange
+    handleIdiomasChange:handleIdiomasChange,
+    myGames:myGames,
+    myGamesUser:myGamesUser,
 
   }
   return <Contexto.Provider value={contextData}>{children}</Contexto.Provider>;

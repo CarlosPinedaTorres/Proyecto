@@ -1,5 +1,13 @@
 from rest_framework import serializers
 from .models import *
+
+class UpdateGamesSerializer(serializers.ModelSerializer):
+    plataformas = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    genero = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    idiomas = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    class Meta:
+        model = Juegos
+        fields = '__all__'
 class GamesSerializer(serializers.ModelSerializer):
     class Meta:
         model=Juegos

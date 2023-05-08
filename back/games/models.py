@@ -37,23 +37,23 @@ class Idiomas(models.Model):
     
 # Juegos que seran para que los vendedores vean sus publicaciones
 class Juegos(models.Model):
-    vendedor=models.ForeignKey(Logueado,on_delete=models.CASCADE)
-    url_portada=models.ImageField(null=True ,upload_to='media/' ,default='subi.png')
-    nombre=models.CharField(max_length=500,null=True)
-    descripcion=models.TextField(null=True)
-    plataformas=models.ManyToManyField(Plataformas,)
-    genero=models.ManyToManyField(Genero)
-    idiomas=models.ManyToManyField(Idiomas,)
-    publicacion=models.DateField(null=True,verbose_name="Fecha lanzamiento")
-    num_llaves=models.IntegerField(null=True)
-    publicado=models.DateField(null=True ,verbose_name="Publicacion de la venta")
-    precio_venta_final=models.DecimalField(max_digits=8, decimal_places=2,null=True,verbose_name='precio final')
-    precio = models.DecimalField(max_digits=8, decimal_places=2,null=True)
+    vendedor=models.ForeignKey(Logueado,on_delete=models.CASCADE ,blank=True, null=True)
+    url_portada=models.ImageField(upload_to='media/' ,default='subi.png',blank=True, null=True)
+    nombre=models.CharField(max_length=500,blank=True, null=True)
+    descripcion=models.TextField(blank=True, null=True)
+    plataformas=models.ManyToManyField(Plataformas,blank=True, null=True)
+    genero=models.ManyToManyField(Genero,blank=True, null=True)
+    idiomas=models.ManyToManyField(Idiomas,blank=True, null=True)
+    publicacion=models.DateField(verbose_name="Fecha lanzamiento",blank=True, null=True)
+    num_llaves=models.IntegerField(blank=True, null=True)
+    publicado=models.DateField(verbose_name="Publicacion de la venta",blank=True, null=True)
+    precio_venta_final=models.DecimalField(max_digits=8, decimal_places=2,verbose_name='precio final',blank=True, null=True)
+    precio = models.DecimalField(max_digits=8, decimal_places=2,blank=True, null=True)
     class Meta:
         verbose_name='Juego'
         verbose_name_plural ='Juegos'
-    def __str__(self):
-        return self.nombre
+    # def __str__(self):
+    #     return self.descripcion
 class Prueba(models.Model):
     imagen=models.ImageField(_("Image"),upload_to=upload_to,default='posts/default.png')
     def __str__(self):

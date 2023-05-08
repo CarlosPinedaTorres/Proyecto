@@ -5,7 +5,9 @@ import { Form} from "react-bootstrap"
 import { Navbar } from "../Navbar"
 export const CreateGame= () => {
 
-  const {obtain_Plataformas,plataformas,obtain_Generos,generos,obtain_Idiomas,idiomas,user,uploadGame,handlePlataformasChange,handleIdiomasChange,handleGenerosChange}=useContext(Contexto)
+  const {obtain_Plataformas,plataformas,obtain_Generos,generos,obtain_Idiomas,idiomas,
+    user,uploadGame,handlePlataformasChange,handleIdiomasChange,
+    handleGenerosChange}=useContext(Contexto)
   useEffect(() => {
       obtain_Plataformas()
       obtain_Generos()

@@ -14,6 +14,7 @@ urlpatterns=[
     path("generos/",GenerosView.as_view(),name='generos'),
     path("idiomas/",IdiomasView.as_view(),name='idiomas'),
     path("myGames/",getMyGames,name='mygames'),
+     path('games/<int:id>/', UpdateGameView.as_view(), name='game-update'),
     
 ]
 # urlpatterns+=router.urls

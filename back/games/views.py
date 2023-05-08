@@ -18,7 +18,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 import jwt
 from django.conf import settings
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,RetrieveUpdateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenViewBase
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -55,7 +55,7 @@ class TestUploadImage(APIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
         else:
             return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
-# Juego
+# CrearJuego
 class UploadNewGame(APIView):
     permission_classes=[AllowAny]
     parser_classes=[MultiPartParser,FormParser]
@@ -110,14 +110,42 @@ class IdiomasView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def getMyGames(request):
-    user= request.user
+    user=request.user
     logueado = Logueado.objects.get(user=user)
     print(logueado)
     juegos=logueado.juegos_set.all()
     serializer=GamesSerializer(juegos,many=True)
     return Response(serializer.data)
 
+
+
 ######
+
+# Editar juego
+
+
+class UpdateGameView(RetrieveUpdateAPIView):
+    permission_classes=[AllowAny]
+    parser_classes=[MultiPartParser,FormParser]
+    serializer_class=GamesSerializer
+    queryset=Juegos.objects.all()
+    lookup_field='id'
+    partial = True
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        # Actualiza las relaciones ManyToMany
+        instance.plataformas.set(serializer.validated_data.get('plataformas', instance.plataformas.all()))
+        instance.genero.set(serializer.validated_data.get('genero', instance.genero.all()))
+        instance.idiomas.set(serializer.validated_data.get('idiomas', instance.idiomas.all()))
+        return Response(serializer.data)
+
+
+######
+
+
 class UserRegisterView(APIView):
     serializer_class = UserRegisterSerializer
     def post(self, request):

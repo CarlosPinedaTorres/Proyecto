@@ -9,6 +9,7 @@ import { Test } from "./Test";
 import PrivateRoutes from "../Services/PrivateRoutes";
 import { CreateGame} from "./CreateGame/CreateGame";
 import { Plataformas } from "./CreateGame/Plataformas";
+import { MyGames } from "./MyGames/MyGames";
 export const Rutas = () => {
   return (
     <>
@@ -23,8 +24,9 @@ export const Rutas = () => {
           <Route path="/infogame/:id" element={<InfoGame />} />
       
           <Route path="/test" element={<test/>} />
-          <Route path="/myGames" element={<CreateGame/>} />
+          <Route path="/CreateGame" element={<CreateGame/>} />
           <Route path="/forma" element={<Plataformas/>} />
+          <Route path="/mygames" element={<MyGames/>} />
       
           <Route path="/*" element={<Navigate to="/home" />} />
         </Routes>

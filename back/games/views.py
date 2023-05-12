@@ -22,7 +22,8 @@ from rest_framework.generics import CreateAPIView,RetrieveUpdateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenViewBase
 import stripe
 from django.views.decorators.csrf import csrf_exempt
-
+from django.core.exceptions import ValidationError
+from django.db import transaction
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -267,6 +268,49 @@ def charge(request):
         return Response({'success': False, 'error': e.error.message}, status=status.HTTP_400_BAD_REQUEST)
 
 ########
+# wallet
+stripe.api_key=settings.STRIPE_SECRET_KEY
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+@transaction.atomic
+def recharge_wallet(request):
+    userName=request.data.get('user')
+    print(userName)
+    logueado = Logueado.objects.get(id=userName['user_id'])
+    print(logueado)
+    wallet = logueado.virtualwallet
+    print(wallet)
+    balance = wallet.balance
+    amount = (request.data.get('amount'))
+    token = (request.data.get('stripeToken'))
+    # amount = int(request.POST.get('amount'))
+
+    # if amount <= 0:
+    #     raise ValidationError(_('Amount should be positive'))
+
+    try:
+        charge = stripe.Charge.create(
+            amount=int(amount) * 100, # convert to cents
+            currency='usd',
+            source=token,
+            description='Wallet recharge for user %s' % userName['username'],
+        )
+
+        wallet.balance=wallet.balance + int(amount)
+        print(wallet.balance)
+        wallet.save()
+
+        return Response({'success': True})
+
+    except stripe.error.CardError as e:
+        return Response({'error': str(e)})
+
+    except Exception as e:
+        return Response({'error': str(e)})
+
+#########
+
+
 
 # Sirve para ver elementos individuales o apis enteras
 

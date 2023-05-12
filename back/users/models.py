@@ -56,10 +56,14 @@ class Logueado(models.Model):
     user=models.OneToOneField(NewUser,on_delete=models.CASCADE)
     telefono=models.CharField(max_length=100 ,null=True)
     pais=models.CharField(max_length=100, null=True)
-    dinero=models.DecimalField(max_digits=8, decimal_places=2)
+    
     class Meta:
         verbose_name='Logueado'
         verbose_name_plural ='Logueado'
     def __str__(self):
         return self.user.username
-
+class VirtualWallet(models.Model):
+    wallet_user=models.OneToOneField(Logueado,on_delete=models.CASCADE)
+    balance=models.DecimalField(max_digits=10,decimal_places=2,default=0)
+    def __str__(self):
+        return f"{self.wallet_user.user.username}'s wallet with balance ${self.balance}"

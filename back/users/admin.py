@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.forms import TextInput, Textarea, CharField
 from django import forms
 from django.db import models
-from users.models import NewUser,Logueado
+from users.models import NewUser,Logueado,VirtualWallet
 class UserAdminConfig(UserAdmin):
     model = NewUser
     search_fields = ('email', 'username', 'first_name',)
@@ -31,5 +31,8 @@ class UserAdminConfig(UserAdmin):
 admin.site.register(NewUser, UserAdminConfig)
 @admin.register(Logueado)
 class LogueadoAdmin(admin.ModelAdmin):
-    list_display=('id','user','telefono','pais','dinero')
+    list_display=('id','user','telefono','pais')
 
+@admin.register(VirtualWallet)
+class VirtualWalletAdmin(admin.ModelAdmin):
+    list_display=('wallet_user','balance')

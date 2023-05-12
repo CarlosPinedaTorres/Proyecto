@@ -14,6 +14,7 @@ import { Edit } from "./MyGames/Edit";
 import { EditGame } from "./MyGames/EditGame";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from "@stripe/stripe-js";
+import RechargeForm from "./Pagos/RechargeForm";
 export const Rutas = () => {
   const stripePromise = loadStripe('pk_test_51N6e2ZLomp5j2gtnuPLFhR6cQ8uLeFlTQvjtRll6xUyZoDFHQUw7aHtWsDaZQMmOyriBKEGcLtMcqhQpJXGY8cna00AQpIlIrm');
   return (
@@ -31,6 +32,7 @@ export const Rutas = () => {
           <Route path="/edit/:id" element={<Edit/>} />
       
           <Route path="/test" element={<Test/>} />
+          <Route path="/test1" element={<RechargeForm/>} />
           <Route path="/CreateGame" element={<CreateGame/>} />
           <Route path="/forma" element={<Plataformas/>} />
           <Route path="/mygames" element={<MyGames/>} />

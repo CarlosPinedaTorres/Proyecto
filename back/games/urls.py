@@ -16,6 +16,7 @@ urlpatterns=[
     path("myGames/",getMyGames,name='mygames'),
     path('games/<int:id>/', UpdateGameView.as_view(), name='game-update'),
     path('api/charge/', charge, name='api-charge'),
+    path('api/recharge_wallet/',recharge_wallet,name="recharge-wallet")
 ]
 # urlpatterns+=router.urls
 

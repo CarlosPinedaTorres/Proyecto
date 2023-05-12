@@ -225,6 +225,12 @@ const [myGamesUser, setmyGamesUser] = useState([])
       }
 
 
+//UpdateGame
+
+  
+    
+    
+    
 
 
 
@@ -242,8 +248,8 @@ const [myGamesUser, setmyGamesUser] = useState([])
     test:test,
     authTokens:authTokens,
     Registrar:Registrar,
-    plataformas:plataformas,
-    obtain_Plataformas:obtain_Plataformas,
+    // plataformas:plataformas,
+    // obtain_Plataformas:obtain_Plataformas,
     generos:generos,
     obtain_Generos:obtain_Generos,
     idiomas:idiomas,
@@ -254,6 +260,35 @@ const [myGamesUser, setmyGamesUser] = useState([])
     handleIdiomasChange:handleIdiomasChange,
     myGames:myGames,
     myGamesUser:myGamesUser,
+    // imageChange:imageChange,
+    // // nameChange:nameChange,
+    // // descriptionChange:descriptionChange,
+    // // publicacionChange:publicacionChange,
+    // // numLlavesChange:numLlavesChange,
+    // // publicadoChange:publicadoChange,
+    // // pVentaFinalChange:pVentaFinalChange,
+    // // precioChange:precioChange,
+    // nombreChange:nombreChange,
+    // descripcion:descripcion,
+    // publicacion:publicacion,
+    // numLlaves:numLlaves,
+    // publicado:publicado,
+    // pVentaFinal:pVentaFinal,
+    // precio:precio,
+    // setNameChange:setNameChange,
+    // setDescripcion:setDescripcion,
+    // setPublicacion:setPublicacion,
+    // setnumLlaves:setnumLlaves,
+    // setpublicado:setpublicado,
+    // setpVentaFinal:setpVentaFinal,
+    // setprecio:setprecio,
+    // plataformasChange:plataformasChange,
+    // setplataformas:setplataformas,
+    // generosChange:generosChange,
+    // setGenerosChange:setGenerosChange,
+    // idiomasChange:idiomasChange,
+    // setIdiomasChange:setIdiomasChange,
+
 
   }
   return <Contexto.Provider value={contextData}>{children}</Contexto.Provider>;

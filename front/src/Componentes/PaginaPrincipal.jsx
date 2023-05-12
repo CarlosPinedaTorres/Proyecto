@@ -3,9 +3,9 @@ import { NavLink, Link } from "react-router-dom";
 import "../Estilos/Juegos.css";
 import { useContext,useState,useEffect } from "react";
 import { Contexto } from "../Context/Contexto";
-import { FormPost } from "./FormPost";
+
 import jwt_decode from "jwt-decode"
-import { Test } from "./Test";
+
 export const PaginaPrincipal = () => {
   const { games ,user,logoutUser,authTokens} = useContext(Contexto);
   // const tokens = JSON.parse(localStorage.getItem('authTokens'));

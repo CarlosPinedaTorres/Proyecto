@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny ,IsAuthenticated
 from rest_framework import generics,viewsets,permissions
-
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework.parsers import MultiPartParser,FormParser
@@ -20,6 +20,8 @@ import jwt
 from django.conf import settings
 from rest_framework.generics import CreateAPIView,RetrieveUpdateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenViewBase
+import stripe
+from django.views.decorators.csrf import csrf_exempt
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -122,14 +124,13 @@ def getMyGames(request):
 ######
 
 # Editar juego
-
+ 
 
 class UpdateGameView(RetrieveUpdateAPIView):
-    permission_classes=[AllowAny]
-    parser_classes=[MultiPartParser,FormParser]
-    serializer_class=GamesSerializer
-    queryset=Juegos.objects.all()
-    lookup_field='id'
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser,FormParser]
+    serializer_class = GamesSerializer
+    lookup_field = 'id'
     partial = True
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -141,6 +142,19 @@ class UpdateGameView(RetrieveUpdateAPIView):
         instance.genero.set(serializer.validated_data.get('genero', instance.genero.all()))
         instance.idiomas.set(serializer.validated_data.get('idiomas', instance.idiomas.all()))
         return Response(serializer.data)
+    def get_queryset(self):
+        # Filtrar los juegos para mostrar solo los que pertenecen al usuario actual
+        queryset = Juegos.objects.filter(vendedor=self.request.user.logueado)
+        return queryset
+
+    def perform_update(self, serializer):
+        # Obtener la instancia actual del juego
+        instance = serializer.save()
+
+        # Verificar si el usuario actual es el propietario del juego
+        if instance.vendedor != self.request.user.logueado:
+            raise PermissionDenied("No tienes permiso para editar este juego.")
+        
 
 
 ######
@@ -214,7 +228,47 @@ class BlacklistTokenView(APIView):
             print("eje-mal")
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        # Sirve para ver elementos individuales o apis enteras
+
+
+# PAGOS CON STRIPE
+
+stripe.api_key=settings.STRIPE_SECRET_KEY
+@api_view(['POST'])
+@csrf_exempt
+def charge(request):
+    # Obtener el token de la tarjeta de crédito desde el cliente
+    token = request.data.get('stripeToken')
+    # Obtener el producto seleccionado por el usuario
+    product = request.data.get('product')
+    # Obtener el correo electrónico del cliente
+    email = request.data.get('email')
+    # Crear un cargo en Stripe
+    try:
+        charge = stripe.Charge.create(
+            amount=product['price'],  # Monto en centavos
+            currency=product['currency'],
+            description=product['name'],
+            source=token,
+            metadata={
+                'customer_name': email,
+            }
+        )
+        # Guardar el pedido en la base de datos
+        # order = Order.objects.create(
+        #     product_name=product['name'],
+        #     product_price=product['price'],
+        #     customer_email=email,
+        #     stripe_charge_id=charge.id,
+        # )
+        # Enviar una respuesta exitosa al cliente
+        return Response({'success': True}, status=status.HTTP_200_OK)
+    except stripe.error.CardError as e:
+        # Enviar una respuesta de error al cliente
+        return Response({'success': False, 'error': e.error.message}, status=status.HTTP_400_BAD_REQUEST)
+
+########
+
+# Sirve para ver elementos individuales o apis enteras
 
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticated]) 

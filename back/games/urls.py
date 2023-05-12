@@ -14,8 +14,8 @@ urlpatterns=[
     path("generos/",GenerosView.as_view(),name='generos'),
     path("idiomas/",IdiomasView.as_view(),name='idiomas'),
     path("myGames/",getMyGames,name='mygames'),
-     path('games/<int:id>/', UpdateGameView.as_view(), name='game-update'),
-    
+    path('games/<int:id>/', UpdateGameView.as_view(), name='game-update'),
+    path('api/charge/', charge, name='api-charge'),
 ]
 # urlpatterns+=router.urls
 

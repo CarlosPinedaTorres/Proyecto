@@ -36,6 +36,7 @@ class Idiomas(models.Model):
         return self.nombre
     
 # Juegos que seran para que los vendedores vean sus publicaciones
+
 class Juegos(models.Model):
     vendedor=models.ForeignKey(Logueado,on_delete=models.CASCADE ,blank=True, null=True)
     url_portada=models.ImageField(upload_to='media/' ,default='subi.png',blank=True, null=True)
@@ -54,6 +55,7 @@ class Juegos(models.Model):
         verbose_name_plural ='Juegos'
     # def __str__(self):
     #     return self.descripcion
+
 class Prueba(models.Model):
     imagen=models.ImageField(_("Image"),upload_to=upload_to,default='posts/default.png')
     def __str__(self):

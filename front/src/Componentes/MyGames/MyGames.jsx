@@ -41,8 +41,8 @@ export const MyGames = () => {
                   <strong> Precio por llave:</strong> {game.precio} 
                   </p>
                   <div class="d-flex justify-content-end">
-        <Link className="nav-link my-4" to={`/infogame/${game.id}`}>
-          <strong> Mas informacion y compra</strong>
+        <Link className="nav-link my-4" to={`/edit/${game.id}`}>
+          <strong>Editar</strong>
         </Link>
       </div>
                 </div>

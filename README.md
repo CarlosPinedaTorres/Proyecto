@@ -1,4 +1,4 @@
-# Proyecto de Desarrollo Web: Gestor_academy
+# Proyecto de Desarrollo Web: GameMasters
 
 ## Descripción
 Este proyecto se trata de un proyecto para final de grado de Carlos Pineda Torres. Se trata de una aplicacion para gestionar una aplicacion de compra venta de juegos.

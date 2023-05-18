@@ -12,7 +12,8 @@ Este proyecto se trata de un proyecto para final de grado de Carlos Pineda Torre
 ## Instalación
 1. Descarga el proyecto o clónalo con Git.
 2. Copia y modifica el fichero ".env.example" con el nombre ".env".(Personalizalo, pero deberia funcionar).
-3. Usa el comando "make init" del Makefile del proyecto. Esto instalará y configurará todo lo necesario.
+3. Usa el comando "make start" y  make django-migrate.
+4. Listo
 
 ## Uso
 1. Ejecuta el comando "make up" para levantar los contenedores mostrando o no el prompt.

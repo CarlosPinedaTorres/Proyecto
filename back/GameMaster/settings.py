@@ -141,7 +141,6 @@ EMAIL_PORT = 587
 
 
 
-
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
@@ -159,7 +158,10 @@ REST_FRAMEWORK ={
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CSRF_TRUSTED_ORIGINGS=['http://localhost:5173']
 
 
 
@@ -207,5 +209,7 @@ SIMPLE_JWT = {
 
 STRIPE_SECRET_KEY = os.environ.get('SECRET_STRIPE')
 STRIPE_PUBLISHABLE_KEY = os.environ.get('PUBLIC_STRIPE')
+
+
 
 

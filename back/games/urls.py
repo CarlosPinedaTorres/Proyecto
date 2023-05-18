@@ -16,7 +16,10 @@ urlpatterns=[
     path("myGames/",getMyGames,name='mygames'),
     path('games/<int:id>/', UpdateGameView.as_view(), name='game-update'),
     path('api/charge/', charge, name='api-charge'),
-    path('api/recharge_wallet/',recharge_wallet,name="recharge-wallet")
+    path('api/recharge_wallet/',recharge_wallet,name="recharge-wallet"),
+    path('api/userStripe/',crear_cliente_stripe,name="create-stripe"),
+    path('api/createUserStripe/',create_stripe_account,name="create-stripe-account"),
+    path('webhook/', my_webhook_view),
 ]
 # urlpatterns+=router.urls
 

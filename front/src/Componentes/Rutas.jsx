@@ -5,7 +5,8 @@ import { SignIn } from "./SignIn";
 import { PaginaPrincipal } from "./PaginaPrincipal";
 import { InfoGame } from "./InfoGame";
 import { ProviderContext } from "../Context/ProviderContext";
-import {Test } from "./Pagos/test";
+import {Test} from "./Pagos/test";
+
 import PrivateRoutes from "../Services/PrivateRoutes";
 import { CreateGame} from "./CreateGame/CreateGame";
 import { Plataformas } from "./CreateGame/Plataformas";
@@ -15,6 +16,7 @@ import { EditGame } from "./MyGames/EditGame";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from "@stripe/stripe-js";
 import RechargeForm from "./Pagos/RechargeForm";
+import { TestCreateUser } from "./Pagos/TestCreateUser";
 export const Rutas = () => {
   const stripePromise = loadStripe('pk_test_51N6e2ZLomp5j2gtnuPLFhR6cQ8uLeFlTQvjtRll6xUyZoDFHQUw7aHtWsDaZQMmOyriBKEGcLtMcqhQpJXGY8cna00AQpIlIrm');
   return (
@@ -30,12 +32,13 @@ export const Rutas = () => {
           <Route path="/login" element={<SignIn/>} />
           <Route path="/infogame/:id" element={<InfoGame />} />
           <Route path="/edit/:id" element={<Edit/>} />
-      
+        
           <Route path="/test" element={<Test/>} />
           <Route path="/test1" element={<RechargeForm/>} />
           <Route path="/CreateGame" element={<CreateGame/>} />
           <Route path="/forma" element={<Plataformas/>} />
           <Route path="/mygames" element={<MyGames/>} />
+          <Route path="/create" element={<TestCreateUser/>} />
       
           <Route path="/*" element={<Navigate to="/home" />} />
         </Routes>

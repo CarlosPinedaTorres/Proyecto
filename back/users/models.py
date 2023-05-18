@@ -56,7 +56,8 @@ class Logueado(models.Model):
     user=models.OneToOneField(NewUser,on_delete=models.CASCADE)
     telefono=models.CharField(max_length=100 ,null=True)
     pais=models.CharField(max_length=100, null=True)
-    
+    customer_id=models.CharField(null=True,blank=True,max_length=100)
+    stripe_account_id =models.CharField(null=True,blank=True,max_length=100)
     class Meta:
         verbose_name='Logueado'
         verbose_name_plural ='Logueado'

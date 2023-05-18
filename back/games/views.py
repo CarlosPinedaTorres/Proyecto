@@ -24,6 +24,9 @@ import stripe
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 from django.db import transaction
+import time
+import smtplib
+from email.mime.text import MIMEText
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -273,33 +276,136 @@ stripe.api_key=settings.STRIPE_SECRET_KEY
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 @transaction.atomic
-def recharge_wallet(request):
-    userName=request.data.get('user')
-    print(userName)
-    logueado = Logueado.objects.get(id=userName['user_id'])
-    print(logueado)
-    wallet = logueado.virtualwallet
-    print(wallet)
-    balance = wallet.balance
-    amount = (request.data.get('amount'))
-    token = (request.data.get('stripeToken'))
-    # amount = int(request.POST.get('amount'))
+# def recharge_wallet(request):
+#     userName=request.data.get('user')
+#     print(userName)
+#     logueado = Logueado.objects.get(id=userName['user_id'])
+#     print(logueado)
+#     wallet = logueado.virtualwallet
+#     print(wallet)
+#     balance = wallet.balance
+#     amount = (request.data.get('amount'))
+#     token = (request.data.get('stripeToken'))
+   
 
-    # if amount <= 0:
-    #     raise ValidationError(_('Amount should be positive'))
+
+#     try:
+#         intent = stripe.Charge.create(
+#             amount=int(amount) * 100, # convert to cents
+#             currency='usd',
+#             source=token,
+#             description='Wallet recharge for user %s' % userName['username'],
+           
+#         )
+
+#         wallet.balance=wallet.balance + int(amount)
+#         print(wallet.balance)
+#         wallet.save()
+      
+#         return Response({'success': True})
+
+#     except stripe.error.CardError as e:
+#         return Response({'error': str(e)})
+
+#     except Exception as e:
+#         return Response({'error': str(e)})
+def create_stripe_account(request):
+    userName = request.data.get('user')
+    logueado = Logueado.objects.get(id=userName['user_id'])
+    current_timestamp=int(time.time())
+    try:
+        account = stripe.Account.create(
+            type='custom',
+            country='ES',
+            email=logueado.user.email,
+            business_type='individual',
+            individual={
+                'first_name': userName['username'],
+                'last_name': 'Pineda',
+                'email': logueado.user.email,
+                
+            },
+            
+            requested_capabilities=['card_payments', 'transfers'],
+            tos_acceptance={
+                'date':current_timestamp,'ip':'45.86.184.246'
+
+
+            },
+            
+        )
+        print(account)
+        
+        # Guardar el ID de la cuenta de Stripe en tu modelo Logueado
+        logueado.stripe_account_id = account.id
+        logueado.save()
+
+        return Response({'success': True, 'account_id': account.id})
+
+    except stripe.error.StripeError as e:
+        return Response({'error': str(e)})
+    
+def send_email(to_email, subject, message):
+    # nuhiruvlmdpnkyvg
+    from_email = 'confirmemailgm@gmail.com'
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'confirmemailgm@gmail.com'
+    smtp_password = 'nuhiruvlmdpnkyvg'
+
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = from_email
+    msg['To'] = to_email
+
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+    server.login(smtp_username, smtp_password)
+    server.send_message(msg)
+    server.quit()
+
+# webhook_signing_secret = 'whsec_65622f40d8f0baa0821ac9e448b5b2d27f64189285fca0495757bf8b3e118b3f'
+@api_view(['POST'])
+def recharge_wallet(request):
+    userName = request.data.get('user')
+    logueado = Logueado.objects.get(id=userName['user_id'])
+    wallet = logueado.virtualwallet
+    balance = wallet.balance
+    amount = request.data.get('amount')
+    payment_method_id = request.data.get('paymentMethodId')
 
     try:
-        charge = stripe.Charge.create(
-            amount=int(amount) * 100, # convert to cents
+        # Obtener la información de la tarjeta de crédito
+        #REVISAR
+        # payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+        # card = payment_method.card
+        # print(card)
+        # Realizar la transacción
+        intent = stripe.PaymentIntent.create(
+            amount=int(amount) * 100, 
             currency='usd',
-            source=token,
+            payment_method=payment_method_id,
+            confirmation_method='manual',
+            confirm=True,
+            customer=logueado.customer_id,
             description='Wallet recharge for user %s' % userName['username'],
+            statement_descriptor='WALLET RECHARGE',
         )
-
-        wallet.balance=wallet.balance + int(amount)
-        print(wallet.balance)
+        print(intent)
+        
+        # Actualizar el balance de la billetera virtual
+        wallet.balance = wallet.balance + int(amount)
         wallet.save()
+        if intent.status == 'succeeded':
+            payment_amount = intent.amount
+            currency = intent.currency
 
+            # Construir el mensaje del correo
+            subject = 'Pago exitoso'
+            message = f"¡Tu pago de {payment_amount} {currency} ha sido aceptado! Se ha ingresado el dinero a tu wallet."
+
+            # Enviar el correo al cliente
+            send_email(logueado.user.email, subject, message)
         return Response({'success': True})
 
     except stripe.error.CardError as e:
@@ -308,6 +414,66 @@ def recharge_wallet(request):
     except Exception as e:
         return Response({'error': str(e)})
 
+
+
+
+from django.http import HttpResponse
+endpoint_secret = 'whsec_65622f40d8f0baa0821ac9e448b5b2d27f64189285fca0495757bf8b3e118b3f'
+@csrf_exempt
+def my_webhook_view(request):
+
+  payload = request.body
+  sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+  event = None
+
+  try:
+    event = stripe.Webhook.construct_event(
+      payload, sig_header, endpoint_secret
+    )
+  except ValueError as e:
+    # Invalid payload
+    return HttpResponse(status=400)
+  except stripe.error.SignatureVerificationError as e:
+    # Invalid signature
+    return HttpResponse(status=400)
+
+
+  return HttpResponse(status=200)
+
+
+
+
+
+
+def crear_cliente_stripe(request):
+    userName = request.data.get('user')
+    print(userName)
+    logueado = Logueado.objects.get(id=userName['user_id'])  # Obtén el usuario de la base de datos
+    print(logueado.user.email)
+    try:
+        # Crea un cliente en Stripe
+        customer = stripe.Customer.create(
+            name=userName['username'],
+            email=logueado.user.email,
+            metadata={
+                'user_id': userName['user_id'],
+            },
+            # invoice_settings={
+            #     'default_payment_method':'card',
+            # },
+        )
+        print(customer)
+        # Guarda el customer_id en el modelo de usuario
+        logueado.customer_id = customer.id
+        logueado.save()
+
+        return Response({'success': True})
+
+    except stripe.error.StripeError as e:
+        return Response({'error': str(e)})
+
+    except userName.DoesNotExist:
+        return Response({'error': 'Usuario no encontrado.'})
 #########
 
 

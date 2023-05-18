@@ -1,99 +1,76 @@
-import React from 'react'
-
-import  { useState } from 'react';
-import { useStripe,useElements,CardElement } from '@stripe/react-stripe-js';
-// import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useState } from 'react';
+import axios from 'axios';
 
 export const Test = () => {  
-    const [email, setEmail] = useState('');
-  const [product, setProduct] = useState({
-    name: 'Product Name',
-    price: 100,
-    currency: 'EUR',
-  });
-  const stripe = useStripe();
-  const elements = useElements();
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [productName, setProductName] = useState('');
+  const [productDescription, setProductDescription] = useState('');
+  const [productPrice, setProductPrice] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    // Crea el token de Stripe
-    const { error, token } = await stripe.createToken(elements.getElement(CardElement), {
-      email,
-    });
-
-    if (error) {
-      console.log(error);
-    } else {
-      console.log(token);
-
-      // Enviar el token al backend
-      try {
-        const response = await fetch("http://localhost:8000/api/charge/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            product,
-            stripeToken: token.id,
-          }),
-        });
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.log(error);
-      }
+    const amount = parseInt(productPrice) * 100; // Convertir a centavos
+    const currency = 'usd';
+    const data = {
+      customer_email: customerEmail,
+      product_name: productName,
+      product_description: productDescription,
+      product_price: productPrice,
+      amount: amount,
+      currency: currency,
+    };
+    try {
+      const response = await axios.post('/api/payment-intent/', data);
+      const clientSecret = response.data.client_secret;
+      // Aquí podrías utilizar Stripe.js para crear la sesión de pago personalizado
+      // y redirigir al cliente a la página de pago.
+    } catch (error) {
+      console.error(error);
     }
-  };
-
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const handleProductChange = (event) => {
-    setProduct({
-      ...product,
-      [event.target.name]: event.target.value,
-    });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
-        Email:
-        <input type="email" value={email} onChange={handleEmailChange} />
-      </label>
-      <br />
-      <label>
-        Product Name:
-        <input type="text" name="name" value={product.name} onChange={handleProductChange} />
-      </label>
-      <br />
-      <label>
-        Price:
-        <input type="number" name="price" value={product.price} onChange={handleProductChange} />
-      </label>
-      <br />
-      <label>
-        Currency:
-        <select name="currency" value={product.currency} onChange={handleProductChange}>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-        </select>
-      </label>
-      <br />
-      
-        <div>
-        Card Details:
-        <CardElement />
-        </div>
-      
-      <br />
-      <button type="submit" disabled={!stripe}>
-        Pay
-      </button>
+      <div>
+        <label htmlFor="customer-email">Email del cliente:</label>
+        <input
+          id="customer-email"
+          type="email"
+          value={customerEmail}
+          onChange={(event) => setCustomerEmail(event.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="product-name">Nombre del producto:</label>
+        <input
+          id="product-name"
+          type="text"
+          value={productName}
+          onChange={(event) => setProductName(event.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="product-description">Descripción del producto:</label>
+        <textarea
+          id="product-description"
+          value={productDescription}
+          onChange={(event) => setProductDescription(event.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="product-price">Precio del producto:</label>
+        <input
+          id="product-price"
+          type="number"
+          value={productPrice}
+          onChange={(event) => setProductPrice(event.target.value)}
+          required
+        />
+      </div>
+      <button type="submit">Pagar</button>
     </form>
   );
-
-  }
-
+};

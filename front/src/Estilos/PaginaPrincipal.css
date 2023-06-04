@@ -1,0 +1,225 @@
+/* 
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        width: 100%;
+      }
+    
+      
+      .row {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        margin-top: 40px;
+      }
+      
+      .col {
+        width: calc(33.33% - 20px);
+        margin-bottom: 20px;
+        margin-right: 20px;
+      }
+      
+    
+     .game-card {
+        background: linear-gradient(10deg, #de750b, #CD5C5C, transparent);
+        border-radius: 30px;
+         border-top-left-radius: 30%;
+        border-top-right-radius: 30%; 
+        padding: 10px; 
+        text-align: center;
+        margin-top: 20px;
+        width: 80%; 
+        height: 200px; 
+      } 
+      
+      .game-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10%;
+        border-radius: 50%;
+      }
+      
+      .game-name {
+        font-size: 18px;
+        margin-top: 10px;
+        color: #fff;
+      }
+      
+      .game-price {
+        font-size: 16px;
+        margin-top: 5px;
+        color: #88c0d0;
+      }
+      
+      @media (max-width: 1200px) {
+        .col {
+          width: calc(50% - 20px);
+        }
+      }
+      
+      @media (max-width: 992px) {
+        .col {
+          width: calc(33.33% - 20px);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .col {
+          width: calc(50% - 20px);
+        }
+      }
+      
+      @media (max-width: 576px) {
+        .col {
+          width: 100%;
+          margin-right: 0;
+        }
+      }
+
+    .filter-toggle{
+      margin-top:100px;
+
+    }
+  
+
+
+    .custom-modal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+       /* .game-image {
+      width: 100%;
+      height: auto;
+      border-radius: 10%;
+      border-radius: 50%;
+    } */
+  
+
+
+    /*.game-card {
+      background: linear-gradient(10deg, #de750b, #CD5C5C, transparent);
+
+      width: 80%; 
+      height: 1500px; 
+    } 
+    .custom-modal .modal-content {
+      background-color: #ffffff; 
+       width: 300px;  
+      padding: 20px;
+      border-radius: 10px; 
+    }  */
+    /*
+    .custom-modal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+ 
+
+    
+      .custom-title {
+        font-family: "Press Start", cursive;
+        /* Otros estilos personalizados */
+      /*}
+      /* Otros estilos personalizados */
+    /*
+      .custom-price {
+        font-family: "Montserrat", sans-serif;
+        /* Otros estilos personalizados */
+     /* }
+      .custom-title {
+        font-family: "Press Start", cursive; /* Fuente enfocada a juegos (retro) */
+        /*font-size: 20px;
+        color: #fff; 
+        margin-bottom: 10px;
+      }
+      
+      .custom-price {
+        font-family: "Montserrat", sans-serif; 
+        font-size: 16px;
+        color: #00ff00; Color personalizado
+      }
+/*       
+      .game-card {
+        background: linear-gradient(10deg, #de750b, #CD5C5C, transparent);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      
+      .game-image {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+      }
+      
+      .custom-button {
+        background: #CD5C5C;
+        color: white;
+        border: none;
+      }
+    
+      .custom-button:hover {
+        background: #de750b;
+      }
+ */
+
+
+      /* .container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        width: 100%;
+      }
+    
+       
+       .row {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        margin-top: 40px;
+      }
+      
+      .col {
+        width: calc(33.33% - 20px);
+        margin-bottom: 20px;
+        margin-right: 20px;
+      }
+
+      
+
+
+        */
+
+
+        @media (max-width: 768px) {
+          .custom-modal {
+            width: 100%;
+          }
+          .button-container {
+            text-align: center;
+          }
+        }
+
+
+        .custom-modal {
+          font-size: 18px;
+          color: #333;
+          padding: 20px;
+        }
+        
+        .button-container {
+          margin-top: 20px;
+        }
+        
+        .game-card {
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 10px;
+          background-color: #fff;
+        }

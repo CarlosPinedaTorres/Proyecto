@@ -15,6 +15,9 @@ import os
 from decouple import config
 from datetime import timedelta
 
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,6 +50,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
 ]
+
+
+
 CORS_ORIGIN_ALLOW_ALL = True
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -140,7 +146,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 
 
-
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
@@ -207,8 +212,12 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+
+
 STRIPE_SECRET_KEY = os.environ.get('SECRET_STRIPE')
 STRIPE_PUBLISHABLE_KEY = os.environ.get('PUBLIC_STRIPE')
+
+
 
 
 

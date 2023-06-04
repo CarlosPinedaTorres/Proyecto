@@ -1,75 +1,117 @@
-import {React,useContext} from "react";
+import {React,useContext,useState} from "react";
 import { NavLink } from "react-router-dom";
 import { Contexto } from "../Context/Contexto";
-export const Navbar = () => {
+import '../Estilos/Navbar.css'
+import { Popover, IconButton, Menu,MenuItem,Modal, ListItem, ListItemText,Button } from '@mui/material';
+import { styled } from '@mui/system';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
+
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faUserFriends, faUserNinja, faUserShield} from '@fortawesome/free-solid-svg-icons';
+
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
+
+
+
+export const Navbar = ({handleModalOpen}) => {
   const {user,logoutUser}=useContext(Contexto)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   return (
-    <div className="w-100">
-      <nav className="navbar navbar-expand-sm bg-secondary navbar-secondary">
-        <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            GameMasters
-          </a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapsibleNavbar"
+    <>
+ <div className="bg-blue-900 px-4 py-2">
+  <nav className="container mx-auto">
+    <div className="flex items-center justify-between">
+      <NavLink to="/" className="text-white font-bold text-xl">
+        GAME MASTERS
+      </NavLink>
+      <div className="hidden md:flex items-center space-x-4">
+        <NavLink
+          to="/home"
+          className="text-white"
+          activeClassName="text-blue-400"
+        >
+          Inicio
+        </NavLink>
+        <a href="#" className="text-white">
+          Sobre Nosotros
+        </a>
+        {user && (
+          <IconButton
+            onClick={handleModalOpen}
+            className="text-white focus:outline-none"
           >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul className="navbar-nav">
-              <li className="nav-item">
-              <NavLink className="nav-link" to="/home">
-                Inicio
+            <AccountCircleIcon fontSize="large" />
+          </IconButton>
+        )}
+      </div>
+
+      <div className="right-0 mt-2 w-48 bg-blue-900 rounded-lg py-2 space-y-2 md:hidden">
+        <button
+          onClick={toggleMenu}
+          className="text-white focus:outline-none"
+        >
+          <FontAwesomeIcon icon={faBars} />
+        </button>
+        {isMenuOpen && (
+          <div className="absolute left-0 mt-2 w-48 bg-blue-900 rounded-lg py-2 space-y-2">
+      <NavLink
+  to="/home"
+  className="block text-white px-4 py-2"
+  activeClassName="text-blue-400"
+  onClick={toggleMenu}
+>
+  Inicio
+</NavLink>
+            <a
+              href="#"
+              className="block text-white px-4 py-2"
+              onClick={toggleMenu}
+            >
+              Sobre Nosotros
+            </a>
+            {user && (
+              <IconButton
+                onClick={() => {
+                  handleModalOpen();
+                  toggleMenu();
+                }}
+                className="text-white focus:outline-none"
+              >
+                <AccountCircleIcon fontSize="large" />
+              </IconButton>
+            )}
+            {!user && (
+              <NavLink
+                to="/login"
+                className="block text-white px-4 py-2"
+                activeClassName="text-blue-400"
+                onClick={toggleMenu}
+              >
+                Login
               </NavLink>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Sobre Nostros
-                </a>
-              </li>
-
-            </ul>
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              {!user &&
-          <li className="nav-item">
-            
-            <NavLink className="nav-link" to="/login">
-              Login
-            </NavLink>
-           
-          </li>
-          }
-        {!user  &&
-          <li className="nav-item">
-            <NavLink className="nav-link" to="/registrar">
+            )}
+            {!user && (
+              <NavLink
+                to="/registrar"
+                className="block text-white px-4 py-2"
+                activeClassName="text-blue-400"
+                onClick={toggleMenu}
+              >
                 Sign up
-            </NavLink>
-          </li> 
-          }
-          {user &&
-          <li className="nav-item">
-            <NavLink onClick={logoutUser} className="nav-link" to="/login">
-              Logout
-            </NavLink>
-          </li>}
-          {user &&
-          <li>
-          
-          <span className="nav-link text-white">Bienvenido, {user.username}!</span>
-
-          </li>
-        }
-        </ul>
-
+              </NavLink>
+            )}
           </div>
-         
-            
-          
-        </div>
-      </nav>
+        )}
+      </div>
     </div>
+  </nav>
+</div>
+    </>
   );
 };

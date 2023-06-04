@@ -65,7 +65,7 @@ const RechargeForm = () => {
  <Navbar/>
  <div className=" vh-100 d-flex justify-content-center align-items-center">
       
-    <form onSubmit={handleSubmit} className='payment-form formPay'>
+    <form onSubmit={handleSubmit} className='payment-form formPay bg-white'>
     <div className="form-group mb-3">
       <h1>RECHARGE WALLET</h1>
     </div>
@@ -109,48 +109,7 @@ const RechargeForm = () => {
     </form>
     </div>
     
-    {/* este */}
-  {/* <CardNumberElement />
-
-
-  <CardExpiryElement />
-
-
-  <CardCvcElement /> */}
-
-      {/* <box   css={{
-  stack: 'x',
-  gap: 'medium',
-  alignX: 'start',
-  }}>
-      <CardElement  options={{
-    iconStyle: "solid",
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770',
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: '#9e2146',
-      },
-    },
-    placeholder: 'Número de tarjeta',
-  }
-    
-    
-       } /></box> */}
-
- 
-  {/* </form> */}
-
-      
   
-     
-  
-    {/* <button id="submit-payment" className="btn btn-primary">Pagar</button> */}
  
   </>
        

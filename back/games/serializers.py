@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from users.models import *
 
 class UpdateGamesSerializer(serializers.ModelSerializer):
     plataformas = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -11,7 +12,8 @@ class UpdateGamesSerializer(serializers.ModelSerializer):
 class GamesSerializer(serializers.ModelSerializer):
     class Meta:
         model=Juegos
-        fields='__all__'
+        fields=('id','vendedor','url_portada','nombre','descripcion','plataformas','genero','idiomas','publicacion','num_llaves','precio', 'precio_venta_final')
+          
 class PlataformasSerializer(serializers.ModelSerializer):
     class Meta:
         model=Plataformas
@@ -31,3 +33,37 @@ class PruebaSerializer(serializers.ModelSerializer):
     class Meta:
         model=Prueba
         fields=('imagen',)
+class LogueadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=VirtualWallet
+        fields='__all__'
+
+class VentasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Ventas
+        fields='__all__'
+
+class PriceHistorySerializer(serializers.ModelSerializer):
+    hora = serializers.SerializerMethodField()
+
+    def get_hora(self, obj):
+        return obj.fecha.strftime('%H:%M:%S')
+    class Meta:
+        model = PriceHistory
+        fields = ('precio', 'hora')
+
+class UserPagosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=userPagos
+        fields='__all__'
+class LogueadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Logueado
+        fields='__all__'
+
+
+class userPaysSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=userPagos
+        fields='__all__'
+   

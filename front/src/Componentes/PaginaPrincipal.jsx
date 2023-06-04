@@ -1,98 +1,256 @@
-import { Navbar } from "./Navbar";
-import { NavLink, Link } from "react-router-dom";
-import "../Estilos/Juegos.css";
-import { useContext,useState,useEffect } from "react";
-import { Contexto } from "../Context/Contexto";
 
-import jwt_decode from "jwt-decode"
-
+import React from 'react'
+import { Contexto } from '../Context/Contexto'
+import { useContext ,useEffect,useState} from 'react'
+import { Navbar } from './Navbar'
+import '../Estilos/PaginaPrincipal.css'
+import { Footer } from './Footer/Footer';
+import { Button as MuiButton,Modal} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import ImageCard from './PaginaP, MYgames/ImageCard';
+import SidebarMenu from './PaginaP, MYgames/SidebarMenu';
+import { Dialog, Transition } from '@headlessui/react';
 export const PaginaPrincipal = () => {
-  const { games ,user,logoutUser,authTokens} = useContext(Contexto);
-  // const tokens = JSON.parse(localStorage.getItem('authTokens'));
-  // const accessToken = tokens.access;
-  const [myGames, setmyGames] = useState([])
 
+  const [selectedOrder, setSelectedOrder] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [selectedIdiom, setSelectedIdiom] = useState(null);
+  const [selectedPlataforma, setSelectedPlataforma] = useState(null)
+
+  const [allGames, setAllGames] = useState([])
+
+  const navigate=useNavigate()
+  
+
+
+  const handlePlataformaSelection = (plataforma) => {
+    if (selectedPlataforma === plataforma.id) {
+      setSelectedPlataforma(null); // Deseleccionar el género si ya estaba seleccionado
+    } else {
+      setSelectedPlataforma(plataforma.id); // Seleccionar el género si no estaba seleccionado previamente
+    }
+  };
+
+  const handleIdiomSelection = (idioma) => {
+    if (selectedIdiom === idioma.id) {
+      setSelectedIdiom(null); // Deseleccionar el género si ya estaba seleccionado
+    } else {
+      setSelectedIdiom(idioma.id); // Seleccionar el género si no estaba seleccionado previamente
+    }
+  };
+
+
+  const handleGenreSelection = (genre) => {
+    if (selectedGenre === genre.id) {
+      setSelectedGenre(null); // Deseleccionar el género si ya estaba seleccionado
+    } else {
+      setSelectedGenre(genre.id); // Seleccionar el género si no estaba seleccionado previamente
+    }
+  };
+
+  const ObtainAllGames=async()=>{
+
+ 
+    let response=await fetch("http://127.0.0.1:8000/allgames/",{
+      method:'GET',
+      headers:{
+        'Content-Type':'application/json',
+      }
+
+    })
+    let data = await response.json()
+    let gamesWithImages = data.map(game => {
+      if (game.image) {
+        // Convertir la imagen en una URL utilizable
+        const url_portada = URL.createObjectURL(game.url_portada)
+        return {...game, url_portada}
+      } else {
+        return game
+      }
+    })
+   
+    setAllGames(gamesWithImages)
+
+  }
+
+  const handleOrderChange = (order) => {
+    console.log('hola')
+  setSelectedOrder(order);
+  };
+
+  const [modalOpen, setModalOpen] = useState(false);
+ 
+  
+  const handleModalOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
+
+  const [juegos, setJuegos] = useState([]);
+  const {myMoney,logoutUser,user,obtain_money_wallet, handleMyGamesClick ,ObtainAccount,account}=useContext(Contexto)
+  const [showFilter, setShowFilter] = useState(false);
+
+
+
+  // Resto de tu código...
 
   useEffect(() => {
-      ObtainMyGames()
+    if (selectedOrder !== null && selectedOrder !== undefined) {
+      const sortedGames = [...allGames];
+  
+      if (selectedOrder === 'asc') {
+        sortedGames.sort((a, b) => a.precio - b.precio);
+      } else if (selectedOrder === 'desc') {
+        sortedGames.sort((a, b) => b.precio - a.precio);
+      } else if (selectedOrder === 'az') {
+        sortedGames.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      } else if (selectedOrder === 'za') {
+        sortedGames.sort((a, b) => b.nombre.localeCompare(a.nombre));
+      }
+  
+      let filteredGames = sortedGames;
+      if (selectedGenre) {
+        filteredGames = filteredGames.filter((game) =>
+          game.genero.includes(selectedGenre)
+        );
+      }
+      if (selectedIdiom) {
+        filteredGames = filteredGames.filter((game) =>
+          game.idiomas.includes(selectedIdiom)
+        );
+      }
+      if (selectedPlataforma) {
+        filteredGames = filteredGames.filter((game) =>
+          game.plataformas.includes(selectedPlataforma)
+        );
+      }
+  
+      console.log('entra', filteredGames);
+  
+      setJuegos(filteredGames);
+    }
+  }, [selectedOrder, allGames, selectedGenre, selectedIdiom, selectedPlataforma]);
+
+
+ 
+
+ 
+  
+  const goStripe=()=>{
+    navigate("/create-user-stripe")
+  }
+  
+
+  useEffect(() => {
+  
+    obtain_money_wallet(user['user_id'])
     
   }, [])
+  useEffect(() => {
+    ObtainAccount(user['user_id']);
+  }, []);
+  useEffect(() => {
+    // Este efecto se ejecuta cuando cambie la dependencia "wallet"
+    if (account.wallet) {
+      obtain_money_wallet(user['user_id']);
+    }
+  }, [myMoney]);
+  useEffect(() => {
+    ObtainAllGames();
+  }, []);
 
-  const ObtainMyGames=async()=>{
-      let response= await fetch('http://localhost:8000/games/',{
-        method:'GET',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization':'Bearer ' + String(authTokens.access)
-        }
-    })
-      let data= await response.json()
-      console.log(data)
-      setmyGames(data)
-    
-     }
 
+
+  ////esto con tailwind
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+const handleToggleSidebar = () => {
+  // Actualizar el estado sidebarOpen
+  setSidebarOpen(!sidebarOpen);
+
+  // Toggle del estado showFilter
+  setShowFilter(!showFilter);
+};
   return (
     <>
-      <Navbar />
-      <Test/>
-    <h1>PAgina principal</h1>
-    <h1>hola {user.username}</h1>
-  {user ?(
-    <>
-    <p onClick={logoutUser}>Logout</p>
-    { myGames &&
-      myGames.map((game)=>{
-        return <li key ={game.nombre}>{game.nombre}</li>
-      })
+  <Navbar handleModalOpen={handleModalOpen} />
+  
+  <div className="mt-4">
+        <div className="w-full flex justify-center">
+          <button
+            className="text-white bg-blue-600 px-4 py-2 rounded-md z-20"
+            onClick={handleToggleSidebar}
+          >
+            {sidebarOpen ? "Cerrar menú" : "Abrir Filtros"}
+          </button>
+        </div>
+        <div className={`relative ${sidebarOpen ? 'block' : 'hidden'} z-10`}>
+        <SidebarMenu
+          sidebarOpen={sidebarOpen}
+          showFilter={showFilter}
+          handleOrderChange={handleOrderChange}
+          handleGenreSelection={handleGenreSelection}
+          selectedGenre={selectedGenre}
+          handleIdiomSelection={handleIdiomSelection}
+          selectedIdiom={selectedIdiom}
+          handlePlataformaSelection={handlePlataformaSelection}
+          selectedPlataforma={selectedPlataforma}
+        >
+            {juegos && <ImageCard imageInfo={juegos} />}
+          </SidebarMenu>
+        </div>
+      </div>
+      {!sidebarOpen && juegos && <ImageCard imageInfo={juegos} />}
       
-    }
-    
-  </>
-  ):(
-  
-  <NavLink to="/login">Login</NavLink>)}
-  
-      {/* <div className='mx-5 my-5mx-5 my-5 text-center'>
-      <h2>Añadidos recientemente</h2>
-      {games.map((game) => {
-        return <div class="container my-5 mx-auto bg-secondary " key={game.id}>
-          <div class="row product-container">
-            <div class="col-3">
-              <img
-                src={game.url_portada}
-                class="mx-2 my-5 img-fluid"
-                alt="Descripción de la imagen"
-              />
-            </div>
-            <div class="col-9 text-center ">
-              <h3 class="product-title my-4">{game.nombre}</h3>
-              <p class="product-description my-2">{game.descripcion}</p>
-              <p class="product-price">
-                Numero de llaves: {game.num_llaves} precio: {game.precio}
-              </p>
-              <Link className="nav-link my-4" to={`/infogame/${game.id}`}>
-                Comprar
-              </Link>
+      <Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                My Account
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                My Games
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
             </div>
           </div>
         </div>
-        Separar
-        //   return <div class="mx-5 my-5mx-5 my-5">
+      </Dialog>
+    </Transition>
+  
+        <Footer/>
 
-        // <img src={game.url_portada} class="card-img-top" className="imagen" alt="imagen" />
+  </>
+  )
+}
 
-        // <div class="card-body bg-secondary">
-        //   <h5 class="card-title">{game.nombre}</h5>
-        //   <p class="card-text">{game.descripcion}</p>
-        //   <p class="card-text"><big>Numero de llaves disponibles: {game.num_llaves}</big></p>
-        //   <Link className="nav-link" to={`/infogame/${game.id}`}>Ver mas</Link>
-        // </div>
-        // </div>
-      })}
-
-      {/* <FormPost /> */}
-      {/* </div> */}
-    </>
-  );
-};

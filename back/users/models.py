@@ -42,6 +42,8 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_verified=models.BooleanField(default=False)
+    is_target=models.BooleanField(default=False,null=True,blank=True)
+
     objects = CustomAccountManager()
 
     USERNAME_FIELD = 'username'
@@ -54,10 +56,13 @@ class NewUser(AbstractBaseUser, PermissionsMixin):
 
 class Logueado(models.Model):
     user=models.OneToOneField(NewUser,on_delete=models.CASCADE)
-    telefono=models.CharField(max_length=100 ,null=True)
-    pais=models.CharField(max_length=100, null=True)
+    telefono=models.CharField(max_length=100 ,null=True,blank=True)
+    pais=models.CharField(max_length=100, null=True,blank=True)
     customer_id=models.CharField(null=True,blank=True,max_length=100)
     stripe_account_id =models.CharField(null=True,blank=True,max_length=100)
+    account=models.BooleanField(default=False,null=True,blank=True)
+    wallet=models.BooleanField(default=False,null=True,blank=True)
+    noVisto=models.BooleanField(default=False,null=True,blank=True)
     class Meta:
         verbose_name='Logueado'
         verbose_name_plural ='Logueado'

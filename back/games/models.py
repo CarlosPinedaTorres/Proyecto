@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from users.models import Logueado
+from django.utils import timezone
 # Create your models here.
 def upload_to(instance,filename):
     return 'posts/{filename}'.format(filename=filename)
@@ -50,11 +51,14 @@ class Juegos(models.Model):
     publicado=models.DateField(verbose_name="Publicacion de la venta",blank=True, null=True)
     precio_venta_final=models.DecimalField(max_digits=8, decimal_places=2,verbose_name='precio final',blank=True, null=True)
     precio = models.DecimalField(max_digits=8, decimal_places=2,blank=True, null=True)
+    precio_mercado=models.DecimalField(max_digits=8,decimal_places=2,blank=True,null=True)
+    activar=models.BooleanField(default=False)
+    vendido=models.BooleanField(default=False)
     class Meta:
         verbose_name='Juego'
         verbose_name_plural ='Juegos'
-    # def __str__(self):
-    #     return self.descripcion
+    def __str__(self):
+        return self.nombre
 
 class Prueba(models.Model):
     imagen=models.ImageField(_("Image"),upload_to=upload_to,default='posts/default.png')
@@ -64,14 +68,27 @@ class Prueba(models.Model):
 class Ventas(models.Model):
     id_comprador=models.ForeignKey(Logueado,on_delete=models.CASCADE,related_name='ventas_comprador')
     id_vendedor=models.ForeignKey(Logueado,on_delete=models.CASCADE,related_name='ventas_vendedor')
-    # id_juego=models.ForeignKey(Juegos,on_delete=models.CASCADE)
+    id_juego=models.ForeignKey(Juegos,on_delete=models.CASCADE,null=True)
     num_llaves_compradas=models.IntegerField()
-
+    precio_venta_user=models.DecimalField(max_digits=8,decimal_places=2,blank=True,null=True)
 
 class PriceHistory(models.Model):
-    # id_juego=models.ForeignKey(Juegos,on_delete=models.CASCADE)
-    precio=models.DecimalField(max_digits=8, decimal_places=2)
-    Fecha=models.DateField()
+    id_juego = models.ForeignKey(Juegos, on_delete=models.CASCADE, null=True)
+    precio = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        # Si no se ha especificado una fecha, utiliza la fecha y hora actual
+        if not self.fecha:
+            self.fecha = timezone.now()
+        super().save(*args, **kwargs)
+class userPagos(models.Model):
+    id_user=models.ForeignKey(Logueado,on_delete=models.CASCADE,null=True)
+    id_juego = models.ForeignKey(Juegos, on_delete=models.CASCADE, null=True)
+    precio = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+    tipo=models.CharField(max_length=500,blank=True, null=True)
+    visto=models.BooleanField(default=False)
 
 # class Keys(models.Model):
 #     id_juego

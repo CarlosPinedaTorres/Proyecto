@@ -13,7 +13,7 @@ class UserAdminConfig(UserAdmin):
                     'is_active', 'is_staff','is_verified')
     fieldsets = (
         (None, {'fields': ('email', 'username', 'first_name',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active','is_verified')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active','is_verified','is_target')}),
         ('Personal', {'fields': ('about',)}),
     )
     formfield_overrides = {
@@ -35,4 +35,4 @@ class LogueadoAdmin(admin.ModelAdmin):
 
 @admin.register(VirtualWallet)
 class VirtualWalletAdmin(admin.ModelAdmin):
-    list_display=('wallet_user','balance')
+    list_display=('id','wallet_user','balance')

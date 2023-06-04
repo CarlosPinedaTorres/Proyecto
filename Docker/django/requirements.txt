@@ -12,3 +12,4 @@ djangorestframework-simplejwt
 django-extensions==3.2.1
 stripe==5.4.0
 
+

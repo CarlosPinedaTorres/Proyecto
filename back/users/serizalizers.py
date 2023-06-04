@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import NewUser
+from users.models import NewUser,Logueado,VirtualWallet
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     email=serializers.EmailField()
@@ -18,3 +18,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.is_staff=True
         user.save()
         return user
+    
+class VirtualWalletSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=VirtualWallet
+        fields='__all__'

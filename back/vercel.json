@@ -3,13 +3,6 @@
       "GameMaster/wsgi.py": {
       }
     },
-    "build": {
-      "env": {
-        "PYTHON_VERSION": "3.9",
-        "VERCEL_PYTHON_VERSION": "3.9",
-        "PIP_NO_BINARY": "psycopg2"
-      }
-    },
     "rewrites": [
       {
         "source": "/(.*)",

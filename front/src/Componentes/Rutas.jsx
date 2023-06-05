@@ -19,6 +19,7 @@ import RechargeForm from "./Pagos/RechargeForm";
 import { TestCreateUser } from "./Pagos/TestCreateUser";
 import {Scope} from "../Scope/Scope"
 import { MisPagos } from "./Pagos/MisPagos";
+import { Home11 } from "./UpdateGame/Home11";
 export const Rutas = () => {
   const stripePromise = loadStripe('pk_test_51N6e2ZLomp5j2gtnuPLFhR6cQ8uLeFlTQvjtRll6xUyZoDFHQUw7aHtWsDaZQMmOyriBKEGcLtMcqhQpJXGY8cna00AQpIlIrm');
   return (
@@ -43,6 +44,7 @@ export const Rutas = () => {
           <Route path="/mygames" element={<MyGames/>} />
           <Route path="/create-user-stripe" element={<TestCreateUser/>} />
           <Route path="/mypays" element={<MisPagos/>} />
+          <Route path="/hom11" element={<Home11/>} />
       
           <Route path="/*" element={<Navigate to="/home" />} />
         </Routes>

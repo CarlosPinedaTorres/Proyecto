@@ -46,7 +46,7 @@ export const Rutas = () => {
           <Route path="/mypays" element={<MisPagos/>} />
           <Route path="/hom11" element={<Home11/>} />
       
-          <Route path="/*" element={<Navigate to="/home" />} />
+          <Route path="/*" element={<Navigate to="/hom11" />} />
         </Routes>
       </ProviderContext>
       </Elements>

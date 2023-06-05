@@ -6,7 +6,8 @@
     },
     "build": {
       "env": {
-        "PYTHON_VERSION": "3.9"
+        "PYTHON_VERSION": "3.9",
+        "PIP_NO_BINARY": "psycopg2"
       }
     },
     "rewrites": [

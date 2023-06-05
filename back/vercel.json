@@ -1,14 +1,14 @@
 {
     "builds": [
       {
-        "src": "GameMaster/wsgi.py",
+        "src": "GameMaster/asgi.py",
         "use": "@vercel/python"
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "GameMaster/wsgi.py"
+        "dest": "GameMaster/asgi.py"
       }
     ]
 }

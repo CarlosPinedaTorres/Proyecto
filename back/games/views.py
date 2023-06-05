@@ -301,58 +301,53 @@ stripe.api_key=settings.STRIPE_SECRET_KEY
 # @permission_classes([IsAuthenticated])
 @transaction.atomic
 
-# USar esta para la demo
-#  "payment_method_types": [
-#     "card"
-#   ],
-# INtentar añadir esto 
 def crear_cliente_stripe(request):
-    userName = request.data.get('user')
-    print('hola1',userName)
-    user=NewUser.objects.get(id=userName['user_id'])
+    user_data = request.data.get('user')
+    print('hola1', user_data)
 
-    logueado = Logueado.objects.get(user=user)  # Obtén el usuario de la base de datos
-    print('hola',logueado)
+    try:
+        user = NewUser.objects.get(id=user_data['user_id'])
+        logueado = Logueado.objects.get(user=user)  # Obtén el usuario de la base de datos
+    except (NewUser.DoesNotExist, Logueado.DoesNotExist):
+        return Response({'error': 'Usuario no encontrado.'})
+
+    print('hola', logueado)
+    print(user_data['username'], 'dadad')
+    
     try:
         shipping_address = {
-        'line1': request.data.get('calle'),
-        'city': request.data.get('ciudad'),
-        'postal_code':request.data.get('cp'),
-        'country': request.data.get('pais') # Reemplaza con el código de país deseado
-        }   
+            'line1': request.data.get('calle'),
+            'city': request.data.get('ciudad'),
+            'postal_code': request.data.get('cp'),
+            'country': request.data.get('pais')  # Reemplaza con el código de país deseado
+        }
         # Crea un cliente en Stripe
         customer = stripe.Customer.create(
-            name=userName['username'],
+            name=user_data['username'],
             email=logueado.user.email,
             tax_exempt='exempt',
             phone='657176776',
             metadata={
-                'user_id': userName['user_id'],
-                'currency':request.data.get('currency')
+                'user_id': user_data['user_id'],
+                'currency': request.data.get('currency')
             },
             shipping={
-            'address': shipping_address,
-            'name':request.data.get('name')
+                'address': shipping_address,
+                'name': request.data.get('name')
             }
-
         )
-        print(customer)
         # Guarda el customer_id en el modelo de usuario
         logueado.customer_id = customer.id
-        logueado.account=True
-        logueado.wallet=True
+        logueado.account = True
+        logueado.wallet = True
         logueado.save()
-        wallet=VirtualWallet(wallet_user=logueado)
+        wallet = VirtualWallet(wallet_user=logueado)
         wallet.save()
-        
+
         return Response({'success': True})
 
     except stripe.error.StripeError as e:
         return Response({'error': str(e)})
-
-    except userName.DoesNotExist:
-        return Response({'error': 'Usuario no encontrado.'})
-    
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 @transaction.atomic
@@ -421,12 +416,12 @@ def recharge_wallet(request):
     print(userName)
     user=NewUser.objects.get(id=userName['user_id'])
     logueado = Logueado.objects.get(user=user)
-    print(logueado)
+    # print(logueado)
     wallet = VirtualWallet.objects.get(wallet_user=logueado)
     balance = wallet.balance
     amount = request.data.get('amount')
     payment_method_id = request.data.get('paymentMethodId')
-    print('waller',wallet)
+    # print('waller',wallet)
     try:
         # Obtener la información de la tarjeta de crédito
         #REVISAR
@@ -446,11 +441,14 @@ def recharge_wallet(request):
             description='Wallet recharge for user %s' % userName['username'],
             statement_descriptor='WALLET RECHARGE',
         )
-        print(intent)
+        # print(intent)
         
         # Actualizar el balance de la billetera virtual
         wallet.balance = wallet.balance + int(amount)
         wallet.save()
+
+  
+
         if intent.status == 'succeeded':
             payment_amount = intent.amount
             currency = intent.currency
@@ -519,7 +517,7 @@ def updateWallet(request):
     logueado=Logueado.objects.get(user=request.user)
     num_llaves_compradas=request.data.get('llaves')
     amount = request.data.get('amount')
-    # print(amount)
+    print(logueado)
     id_comprador=request.data.get('id_comprador')
     id_vendedor=request.data.get('id_vendedor')
     id_juego=request.data.get('id_juego')
@@ -533,6 +531,7 @@ def updateWallet(request):
     wallet = VirtualWallet.objects.get(wallet_user=logueado)
     wallet.balance =wallet.balance - amount  
     wallet.save() 
+  
     serializer = VirtualWalletSerializer(wallet)
     return Response(serializer.data)
 
@@ -672,6 +671,7 @@ def getHistoryPrices(request,id_juego):
 @api_view(['GET'])
 def getPaysUser(request,id_user):
     user=NewUser.objects.get(id=id_user)
+    print(user)
     logueado=Logueado.objects.get(user=user)
     pays= userPagos.objects.filter(id_user=logueado).order_by('-fecha')[:10]
     serializer=PriceHistorySerializer(pays,many=True)
@@ -712,9 +712,13 @@ def getNameVendedor(request, id_user):
 
 @api_view(['GET'])
 def getMyPays(request, id_user):
+    print(id_user)
     user=NewUser.objects.get(id=id_user)
+    print(user)
     logueado=Logueado.objects.get(user=user)
+    print(logueado)
     pays=userPagos.objects.filter(id_user=logueado)
+    print(pays)
     serializer=userPaysSerializer(pays,many=True)
 
     return Response(serializer.data)

@@ -176,6 +176,7 @@ const handleToggleSidebar = () => {
 };
   return (
     <>
+    <div className="flex flex-col min-h-screen">
   <Navbar handleModalOpen={handleModalOpen} />
   
   <div className="mt-4">
@@ -203,8 +204,9 @@ const handleToggleSidebar = () => {
           </SidebarMenu>
         </div>
       </div>
-      {!sidebarOpen && juegos && <ImageCard imageInfo={juegos} />}
-      
+      <div className="flex flex-col flex-grow">
+      {!sidebarOpen && juegos.length>0 ? <ImageCard imageInfo={juegos} />:<h1>NO hay juegos con esas caracteristicas</h1>}
+      </div>
       <Transition appear show={modalOpen} as={React.Fragment}>
       <Dialog
         as="div"
@@ -247,9 +249,10 @@ const handleToggleSidebar = () => {
         </div>
       </Dialog>
     </Transition>
-  
+  <div className='min-h-0'>
         <Footer/>
-
+        </div>
+        </div>
   </>
   )
 }

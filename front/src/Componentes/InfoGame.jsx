@@ -5,8 +5,8 @@ import { Contexto } from "../Context/Contexto";
 import { Fragment } from 'react';
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer/Footer";
+import { Button as MuiButton,Modal} from '@mui/material';
 
-import { Modal, Button } from '@mui/material';
 import { Scope } from "../Scope/Scope";
 
 export const InfoGame = () => {
@@ -16,7 +16,7 @@ const [precioPropuesto, setPrecioPropuesto] = useState(0);
   const [id_real, setId] = useState([])
   const [confirmar, setConfirmar] = useState(false)
   const { user, logoutUser, obtain_money_wallet, myMoney, authTokens, obtain_Idiomas, idiomas ,obtain_Generos,generos,obtain_Plataformas,plataformas
-    ,ObtainUserName, userName
+    ,ObtainUserName, userName, ObtainAccount,account,handleMyGamesClick 
   } = useContext(Contexto);
   const num_llaves = useRef(null)
   const final_price = useRef(null)
@@ -25,6 +25,11 @@ const [precioPropuesto, setPrecioPropuesto] = useState(0);
 
 const [compra, setComprar] = useState(true)
   const [game, setGame] = useState([])
+  const goStripe=()=>{
+    navigate("/create-user-stripe")
+  }
+  
+
   const ObtainGame = async (idJuego) => {
     console.log('dentro', idJuego)
     let response = await fetch(`http://127.0.0.1:8000/juego/${idJuego}/`, {
@@ -77,8 +82,8 @@ const [compra, setComprar] = useState(true)
 
     })
     let data = await response.json()
-    await obtain_money_wallet();
-    await ObtainGame(id_real)
+    await obtain_money_wallet(user['user_id']);
+    await ObtainGame(id.id)
     console.log(data)
   }
 
@@ -112,7 +117,7 @@ const [compra, setComprar] = useState(true)
     console.log('SEGUNDO', game)
     console.log(user['user_id'])
     obtain_money_wallet(user['user_id'])
-    if(game!=[]){
+    if(game.length>0){
     ObtainUserName(game.vendedor)
     }
   }, [game])
@@ -127,13 +132,15 @@ const [compra, setComprar] = useState(true)
   }, [game])
   useEffect(() => {
 
-    if (gameLoaded) {
+  
       ObtainGame(id.id)
-    }
+    
 
 
   }, [gameLoaded])
-
+  useEffect(() => {
+    ObtainAccount(user['user_id']);
+  }, []);
   const [modalOpen, setModalOpen] = useState(false);
 
 
@@ -147,31 +154,7 @@ const [compra, setComprar] = useState(true)
   return (
     <>
       <Navbar handleModalOpen={handleModalOpen} />
-      <div >
-
-
-        <Modal open={modalOpen} onClose={handleModalClose} className="custom-modal">
-          <div className="modal-content">
-            <h3 className="modal-title text-center">Mi Modal</h3>
-
-            <Button style={{ fontSize: '18px' }} className="form-control">
-              Wallet: {myMoney}
-            </Button>
-            <Button onClick={logoutUser} style={{ fontSize: '18px' }} className="form-control">
-              Logout
-            </Button>
-            <Button
-              style={{ fontSize: '18px' }}
-              onClick={handleModalClose}
-              className="form-control"
-            >
-              Cerrar Modal
-            </Button>
-
-          </div>
-        </Modal>
-
-      </div>
+    
 
       {game !== null && (
   <div className="container mx-auto p-6">
@@ -267,8 +250,52 @@ const [compra, setComprar] = useState(true)
   </div>
 )}
 
+       <div className="mb-5">
+        <Scope id_juego={id.id} />
+      </div> 
 <Footer />
-
+<Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                My Account
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                My Games
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
     </>
   );
 };
@@ -292,7 +319,4 @@ function renderInfoCard(title, data, dataMap = null) {
 }
 
 
-      {/* <div>
-        <Scope id_juego={id.id} />
-      </div> */}
 

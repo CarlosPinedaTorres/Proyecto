@@ -72,42 +72,90 @@ export const Scope = ({id_juego}) => {
       // Destruir el gráfico existente si ya está creado
       myChart.destroy();
     }
-    myChart=new Chart(myChartRef, {
+    myChart = new Chart(myChartRef, {
       type: 'line',
       data: {
         labels: data.map(row => row.hora),
         datasets: [
           {
             label: 'Acquisitions by month',
-            data: data.map(row => row.precio)
-          }
+            data: data.map(row => row.precio),
+            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Personaliza el color de fondo del área bajo la línea
+            borderColor: 'rgba(75, 192, 192, 1)', // Personaliza el color de la línea
+            borderWidth: 2, // Personaliza el ancho de la línea
+            pointRadius: 4, // Personaliza el tamaño de los puntos en la línea
+            pointBackgroundColor: 'rgba(255, 255, 255, 1)', // Personaliza el color de fondo de los puntos
+            pointBorderColor: 'rgba(75, 192, 192, 1)', // Personaliza el color del borde de los puntos
+            tension: 0.4, // Personaliza la suavidad de la línea (0 = recta, 1 = curva suave)
+          },
         ],
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             display: true,
             title: {
               display: true,
-              text: 'Fechas' // Personaliza el título del eje X
-            }
+              text: 'Fechas', // Personaliza el título del eje X
+              color: 'rgba(255, 255, 255, 1)', // Personaliza el color del título del eje X
+              font: {
+                size: 16, // Personaliza el tamaño de fuente del título del eje X
+              },
+            },
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.8)', // Personaliza el color de las marcas del eje X
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)', // Personaliza el color de las líneas de cuadrícula del eje X
+            },
           },
           y: {
             display: true,
             title: {
               display: true,
-              text: 'Precio' // Personaliza el título del eje Y
-            }
-          }
-        }
+              text: 'Precio', // Personaliza el título del eje Y
+              color: 'rgba(255, 255, 255, 1)', // Personaliza el color del título del eje Y
+              font: {
+                size: 16, // Personaliza el tamaño de fuente del título del eje Y
+              },
+            },
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.8)', // Personaliza el color de las marcas del eje Y
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)', // Personaliza el color de las líneas de cuadrícula del eje Y
+            },
+          },
+        },
+        plugins: {
+          // Personaliza la leyenda del gráfico
+          legend: {
+            display: true,
+            labels: {
+              color: 'rgba(255, 255, 255, 1)', // Personaliza el color del texto de la leyenda
+              boxWidth: 20, // Personaliza el ancho del cuadro de color en la leyenda
+              padding: 20, // Personaliza el espacio entre los elementos de la leyenda
+            },
+          },
+        },
       },
     });
   };
+
   const destroyChart = () => {
     if (myChart) {
       myChart.destroy();
       myChart = null;
     }
   };
-  return <canvas  ref={chartRef} />;
-}
+  return (
+    <div className="bg-gray-800 p-4 rounded-md shadow-md">
+      <h2 className="text-white text-xl font-semibold mb-4">Acquisitions by month</h2>
+      <div className="relative h-96">
+        <canvas ref={chartRef} />
+      </div>
+    </div>
+  );
+};

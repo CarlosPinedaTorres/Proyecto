@@ -8,7 +8,10 @@ import { GameFilter } from '../Filtros/GameFilter';
 import { Footer } from '../Footer/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button as MuiButton, Modal } from '@mui/material';
-import { motion } from "framer-motion";
+import SidebarMenu from '../PaginaP, MYgames/SidebarMenu';
+import { Dialog, Transition } from '@headlessui/react';
+// import { motion } from "framer-motion";
+import { ImageCardMyGames } from '../PaginaP, MYgames/ImageCardMyGames';
 export const MyGames = () => {
   const navigate = useNavigate()
   const [filasDeJuegos, setFilasDeJuegos] = useState([]);
@@ -68,7 +71,7 @@ export const MyGames = () => {
 
   }, []);
 
-
+  const [juegos, setJuegos] = useState([]);
   const [visto, setVisto] = useState(false);
   const ObtainInfoLog = async (id_user) => {
     try {
@@ -114,7 +117,7 @@ export const MyGames = () => {
   useEffect(() => {
     if (selectedOrder !== null && selectedOrder !== undefined) {
       const sortedGames = [...myGamesUser];
-
+  
       if (selectedOrder === 'asc') {
         sortedGames.sort((a, b) => a.precio - b.precio);
       } else if (selectedOrder === 'desc') {
@@ -124,55 +127,29 @@ export const MyGames = () => {
       } else if (selectedOrder === 'za') {
         sortedGames.sort((a, b) => b.nombre.localeCompare(a.nombre));
       }
-
-
+  
       let filteredGames = sortedGames;
       if (selectedGenre) {
-        console.log(selectedGenre)
-        filteredGames = sortedGames.filter(game => game.genero.includes(selectedGenre));
-        console.log('aqui', filteredGames)
+        filteredGames = filteredGames.filter((game) =>
+          game.genero.includes(selectedGenre)
+        );
       }
       if (selectedIdiom) {
-
-        filteredGames = sortedGames.filter(game => game.idiomas.includes(selectedIdiom));
-        console.log('aqui', filteredGames)
+        filteredGames = filteredGames.filter((game) =>
+          game.idiomas.includes(selectedIdiom)
+        );
       }
       if (selectedPlataforma) {
-
-        filteredGames = sortedGames.filter(game => game.plataformas.includes(selectedPlataforma));
-        console.log('aqui', filteredGames)
+        filteredGames = filteredGames.filter((game) =>
+          game.plataformas.includes(selectedPlataforma)
+        );
       }
-      // console.log(filteredGames)
-      // Filtrar por género si se selecciona la opción correspondiente
-
-
-      console.log('entra', filteredGames)
-      const filas = [];
-      let fila = [];
-      for (let i = 0; i < filteredGames.length; i++) {
-        if (i % 3 === 0 && i !== 0) {
-          filas.push(fila);
-          fila = [];
-        }
-        fila.push(filteredGames[i]);
-      }
-      filas.push(fila);
-      setFilasDeJuegos(filas);
-    } else {
-      const filas = [];
-      let fila = [];
-      for (let i = 0; i < myGamesUser.length; i++) {
-        if (i % 3 === 0 && i !== 0) {
-          filas.push(fila);
-          fila = [];
-        }
-        fila.push(myGamesUser[i]);
-      }
-      filas.push(fila);
-      setFilasDeJuegos(filas);
+  
+      console.log('entra', filteredGames);
+  
+      setJuegos(filteredGames);
     }
   }, [selectedOrder, myGamesUser, selectedGenre, selectedIdiom, selectedPlataforma]);
-
 
   useEffect(() => {
     ObtainInfoLog(user['user_id']);
@@ -193,6 +170,15 @@ export const MyGames = () => {
   const goStripeMoney = () => {
     navigate("/test1")
   }
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleToggleSidebar = () => {
+    // Actualizar el estado sidebarOpen
+    setSidebarOpen(!sidebarOpen);
+  
+    // Toggle del estado showFilter
+    setShowFilter(!showFilter);
+  };
   return (
     <>
       {/* <Navbar handleModalOpen={handleModalOpen} />
@@ -307,46 +293,124 @@ export const MyGames = () => {
   
   <Footer /> */}
 
+<div className="flex flex-col min-h-screen">
+<Navbar handleModalOpen={handleModalOpen} />
 
-      <Navbar handleModalOpen={handleModalOpen} />
-
-      <div >
-
-
-        <Modal open={modalOpen} onClose={handleModalClose} className="custom-modal">
-          <div className="modal-content">
-            <h3 className="modal-title text-center">My Account</h3>
-            {account.wallet ?
-              <MuiButton style={{ fontSize: '18px' }} className="form-control">
-                Wallet: {myMoney}
-              </MuiButton>
-              : <MuiButton style={{ fontSize: '18px' }} className="form-control" onClick={goStripe}>
-                Crear user en stripe
-              </MuiButton>}
-            <MuiButton onClick={logoutUser} style={{ fontSize: '18px' }} className="form-control">
-              Logout
-            </MuiButton>
-            <MuiButton
-              style={{ fontSize: '18px' }}
-              onClick={handleMyGamesClick}
-              className="form-control"
+  <div className="mt-4">
+        <div className="w-full flex justify-center">
+          <button
+            className="text-white bg-blue-600 px-4 py-2 rounded-md z-20"
+            onClick={handleToggleSidebar}
+          >
+            {sidebarOpen ? "Cerrar menú" : "Abrir Filtros"}
+          </button>
+          {!account.account ? (
+        <div className="text-center  ml-4">
+          <button
+            className="bg-red-600 text-white px-4 py-2 rounded-md"
+            onClick={goStripe}
+          >
+            Crear cuenta de Stripe
+          </button>
+        </div>
+      ) : (
+        <div className="ml-4">
+          <div className="flex space-x-4">
+            {myGamesUser.length > 0 && (
+              <button
+                className="bg-red-600 text-white px-4 py-2 rounded-md"
+                onClick={handleToggleFilter}
+              >
+                {showFilter ? "Ocultar filtros" : "Mostrar filtros"}
+              </button>
+            )}
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded-md"
+              onClick={createGame}
             >
-              My Games
-            </MuiButton>
-            <MuiButton
-              style={{ fontSize: '18px' }}
-              onClick={handleModalClose}
-              className="form-control"
+              Crear Juego
+            </button>
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded-md"
+              onClick={goStripeMoney}
             >
-              Cerrar Modal
-            </MuiButton>
-
+              Ingresar dinero
+            </button>
           </div>
-        </Modal>
-
+        </div>)
+}
+        </div>
+        <div className={`relative ${sidebarOpen ? 'block' : 'hidden'} z-10`}>
+        <SidebarMenu
+          sidebarOpen={sidebarOpen}
+          showFilter={showFilter}
+          handleOrderChange={handleOrderChange}
+          handleGenreSelection={handleGenreSelection}
+          selectedGenre={selectedGenre}
+          handleIdiomSelection={handleIdiomSelection}
+          selectedIdiom={selectedIdiom}
+          handlePlataformaSelection={handlePlataformaSelection}
+          selectedPlataforma={selectedPlataforma}
+        >
+            {juegos && <ImageCardMyGames imageInfo={juegos} />}
+          </SidebarMenu>
+        </div>
       </div>
-
-      {!account.account ? (
+      <div className="flex flex-col flex-grow"> 
+      
+      {!sidebarOpen && juegos && <ImageCardMyGames imageInfo={juegos} />}
+      </div>
+      <Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                My Account
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+              <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis pagos
+              </MuiButton>
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                My Games
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+   
+      
+      <Footer />
+      
+      </div>
+      {/* {!account.account ? (
         <div className="text-center d-flex flex-column align-items-center">
           <p className="text-white mt-5 mb-0">Debes proporcionarnos información adicional para poder crear juegos.</p>
           <div className="d-flex justify-content-center">
@@ -436,7 +500,7 @@ export const MyGames = () => {
           </Col>
         </Row>
       </div>
-      )}
+      )} */} 
 
 
     </>

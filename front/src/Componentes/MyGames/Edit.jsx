@@ -4,6 +4,8 @@ import { Navbar } from '../Navbar';
 import { useContext } from 'react';
 import { Contexto } from '../../Context/Contexto';
 import { Footer } from '../Footer/Footer';
+import { Dialog, Transition } from '@headlessui/react';
+import { Button as MuiButton,Modal} from '@mui/material';
 export const Edit = () => {
   const navigate=useNavigate()
   const [selectedFile, setSelectedFile] = useState(null)
@@ -17,16 +19,26 @@ export const Edit = () => {
   const [plataformasChange, setplataformas] = useState(null)
   const [generosChange, setGenerosChange] = useState(null)
   const [idiomasChange, setIdiomasChange] = useState(null)
-
+  const goStripe=()=>{
+    navigate("/create-user-stripe")
+  }
+  
   const [fectAll, setfectAll] = useState({
     'gen':false,
     'plata':false,
     'idioma':false
   })
-    const {authTokens
+    const {authTokens, ObtainAccount,account,logoutUser,handleMyGamesClick,user,myMoney,obtain_money_wallet}=useContext(Contexto)
+    const [modalOpen, setModalOpen] = useState(false);
+ 
   
-    }=useContext(Contexto)
-
+    const handleModalOpen = () => {
+      setModalOpen(true);
+    };
+  
+    const handleModalClose = () => {
+      setModalOpen(false);
+    };
     const [plataformas, setPlataformas] = useState([])
     
     const obtain_Plataformas=async()=>{
@@ -315,7 +327,9 @@ export const Edit = () => {
      
     }, [info])
 
-   
+    useEffect(() => {
+      ObtainAccount(user['user_id']);
+    }, []);   
     // useEffect(() => {
     
     //   console.log('2_useffect')
@@ -330,103 +344,265 @@ export const Edit = () => {
 
     // }, [fectAll])
     
-    
+    useEffect(() => {
+  
+      obtain_money_wallet(user['user_id'])
+      
+    }, [])
   return (
     <>
-    <div className='mb-5 '>
-    <Navbar/>
-    </div>
-    
-    {!loading ?
-      <div className="row d-flex justify-content-center mt-3 ">
-  <div className="col-12 col-md-8 col-lg-6">
-    <div className="border border-3 border-primary"></div>
-    <div className="bg-white card text-dark shadow-lg">
-      <div className="card-body p-5">
-        <form className="mb-3 mt-md-4 row" encType="multipart/form-data" onSubmit={updateGame}>
-          
-            <h2 className="fw-bold mb-2 text-uppercase">Editar Juego</h2>
-            <p className="mb-5">Cambia los campos que desees editar</p>
-            <div className="col-md-6">
-            <div className="mb-3">
-              <label htmlFor="vendedor" className="form-label rounded text-dark border-dark text-decoration-underline">Nombre vendedor:</label>
-              <input type="text" className="form-control bg-secondary border-dark" value={vendedor} name="vendedor" placeholder="Nombre del vendedor" />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="url_portada" className="form-label rounded text-dark border-dark text-decoration-underline">Escoge una imagen de portada para tu juego:</label>
-              <input type="file" className="form-control bg-secondary border-dark" onChange={imageChange} name="url_portada" />
-            </div>
-            </div>
-            
-            <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="nombre" className="form-label rounded text-dark border-dark text-decoration-underline">Introduce el nombre del juego:</label>
-                <input type="text"  className="form-control bg-secondary border-dark" value={info.nombre} onChange={nameChange}  name="nombre" placeholder="Nombre del juego"/>
-              </div>
-              <div className="mb-3">
-                <label htmlFor="descripcion" className="form-label rounded text-dark border-dark text-decoration-underline">Descripcion:</label>
-                <textarea type="text-field"  className="form-control bg-secondary border-dark" value={info.descripcion} onChange={descriptionChange} name="descripcion" placeholder="Introduce una breve descripcion del juego"/>
-              </div>
-            </div>
-            
-              <div className="mb-3">
-              <label htmlFor="plataformas" className="form-label rounded text-dark border-dark text-decoration-underline">Plataformas:</label>
-              <select  value={plataformasNames} onChange={PlataformasChange} className="form-select"  multiple aria-label="multiple select example" name="plataformas" >
-                  {
-                  plataformas.map((plataforma)=>{
-                  return <option key={plataforma.id}>{plataforma.nombre}</option>})}
-              </select>
-              </div>
-            
-           
-              <div className="mb-3">
-              <label htmlFor="generos" className="form-label rounded text-dark border-dark text-decoration-underline">Generos:</label>
-              <select className="form-select" value={GenerosNames} onChange={GenerosChange} multiple aria-label="multiple select example" name="generos" >
-                  {
-                  generos.map((genero)=>{
-                  return <option key={genero.id}>{genero.nombre}</option>})}
-              </select>
-              </div>     
-              <div className="mb-3">
-              <label htmlFor="idiomas" className="form-label rounded text-dark border-dark text-decoration-underline">Idiomas:</label>
-              <select className="form-select" value={IdiomasNames} onChange={IdiomasChange} multiple aria-label="multiple select example" name="idiomas" >
-                  {
-                  idiomas.map((idioma)=>{
-                  return <option key={idioma.id}>{idioma.nombre}</option>})}
-              </select>
-              </div>
-              <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="publicacion" className="form-label rounded text-dark border-dark text-decoration-underline">publicacion:</label>
-                <input type="date" value={info.publicacion}className="form-control bg-secondary border-dark" onChange={publicacionChange} name="publicacion" />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="num_llaves" className="form-label rounded text-dark border-dark text-decoration-underline">num_llaves:</label>
-                <input type="text"value={info.num_llaves} className="form-control bg-secondary border-dark" onChange={numLlavesChange} name="num_llaves" />
-              </div>
-              </div>
-              <div className="col-md-6">
+    <div className="flex flex-col min-h-screen">
+      
+    <Navbar handleModalOpen={handleModalOpen} />
+
+      {!loading ? (
+        <div className="flex flex-col items-center mt-3 space-y-5">
          
-          
-            
-              
-              <div className="mb-3">
-                <label htmlFor="precio" className="form-label rounded text-dark border-dark text-decoration-underline">precio :</label>
-                <input type="text" value={info.precio} className="form-control bg-secondary border-dark" onChange={precioChange}  name="precio" />
+          <div className="bg-white text-dark shadow-lg rounded-md p-5 w-full max-w-2xl mb-5">
+            <form
+              className="space-y-5"
+              encType="multipart/form-data"
+              onSubmit={updateGame}
+            >
+              <h2 className="text-2xl font-bold mb-2 text-uppercase">
+                Editar Juego
+              </h2>
+              <p className="mb-5">
+                Cambia los campos que desees editar
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label
+                    htmlFor="vendedor"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Nombre vendedor:
+                  </label>
+                  <input
+                    type="text"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={vendedor}
+                    name="vendedor"
+                    placeholder="Nombre del vendedor"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="url_portada"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Imagen de portada:
+                  </label>
+                  <input
+                    type="file"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={imageChange}
+                    name="url_portada"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="nombre"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Nombre del juego:
+                  </label>
+                  <input
+                    type="text"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={info.nombre}
+                    onChange={nameChange}
+                    name="nombre"
+                    placeholder="Nombre del juego"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="descripcion"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Descripción:
+                  </label>
+                  <textarea
+                    type="text-field"
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={info.descripcion}
+                    onChange={descriptionChange}
+                    name="descripcion"
+                    placeholder="Breve descripción del juego"
+                  />
+                </div>
               </div>
-              <div className="d-grid my-5">
-                <button className="btn btn-outline-dark" type="submit">Editar</button>
+
+              <div className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="plataformas"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Plataformas:
+                  </label>
+                  <select
+                    value={plataformasNames}
+                    onChange={PlataformasChange}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    multiple
+                    aria-label="multiple select example"
+                    name="plataformas"
+                  >
+                    {plataformas.map((plataforma) => (
+                      <option key={plataforma.id}>{plataforma.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="generos"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Géneros:
+                  </label>
+                  <select
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={GenerosNames}
+                    onChange={GenerosChange}
+                    multiple
+                    aria-label="multiple select example"
+                    name="generos"
+                  >
+                    {generos.map((genero) => (
+                      <option key={genero.id}>{genero.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="idiomas"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Idiomas:
+                  </label>
+                  <select
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    value={IdiomasNames}
+                    onChange={IdiomasChange}
+                    multiple
+                    aria-label="multiple select example"
+                    name="idiomas"
+                  >
+                    {idiomas.map((idioma) => (
+                      <option key={idioma.id}>{idioma.nombre}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label
+                    htmlFor="publicacion"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Publicación:
+                  </label>
+                  <input
+                    type="date"
+                    value={info.publicacion}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={publicacionChange}
+                    name="publicacion"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="num_llaves"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Número de llaves:
+                  </label>
+                  <input
+                    type="text"
+                    value={info.num_llaves}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={numLlavesChange}
+                    name="num_llaves"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="precio"
+                    className="block mb-1 font-semibold text-dark"
+                  >
+                    Precio:
+                  </label>
+                  <input
+                    type="text"
+                    value={info.precio}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={precioChange}
+                    name="precio"
+                  />
+                </div>
               </div>
-            
+              <div className="flex justify-end">
+            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="submit">Crear</button>
+          </div>
             </form>
           </div>
         </div>
+      ) : (
+        <p>Cargando</p>
+      )}
+
+      <div className="mb-5 mt-auto">
+        <Footer />
       </div>
-    </div> : <p>Cargando</p>}
-    <div className='mb-5'>
-    <Footer/>
     </div>
+    <Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                My Account
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                My Games
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
     </>
   )
 }

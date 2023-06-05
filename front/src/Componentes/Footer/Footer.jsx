@@ -5,7 +5,7 @@ import {faHome, faEnvelope, faPhone } from '@fortawesome/free-solid-svg-icons';
 
 export const Footer = () => {
   return (
-    <div className="w-full bg-blue-900 flex flex-col">
+    <div className="flex flex-col w-full bg-blue-900 min-h-0">
     <div className="flex-grow" />
     <footer className="text-blue-200 font-sans w-full">
       <div className="container mx-auto px-4 pb-0 w-full">

@@ -5,6 +5,7 @@ import { Contexto } from "../../Context/Contexto";
 import { loadStripe } from '@stripe/stripe-js';
 import "../../Estilos/Juegos.css"
 import {Navbar} from "../Navbar"
+import { Footer } from '../Footer/Footer';
 const stripePromise = loadStripe('pk_test_51N6e2ZLomp5j2gtnuPLFhR6cQ8uLeFlTQvjtRll6xUyZoDFHQUw7aHtWsDaZQMmOyriBKEGcLtMcqhQpJXGY8cna00AQpIlIrm');
 
 const RechargeForm = () => {
@@ -63,54 +64,68 @@ const RechargeForm = () => {
          <>
 
  <Navbar/>
- <div className=" vh-100 d-flex justify-content-center align-items-center">
-      
-    <form onSubmit={handleSubmit} className='payment-form formPay bg-white'>
-    <div className="form-group mb-3">
-      <h1>RECHARGE WALLET</h1>
+ <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+    <div className="mb-4">
+      <h1 className="font-bold text-xl mb-2">RECHARGE WALLET</h1>
     </div>
-      <div className="form-group">
-      <label>Bienvenido YIblack</label>
+    <div className="mb-4">
+      <label className="block text-gray-700 text-sm font-bold mb-2">
+        Bienvenido YIblack
+      </label>
     </div>
-    <div className="form-group mb-3">
-    <label htmlFor="amount">Amount to send: </label>
-    <input type="number" id="amount" value={amount} onChange={(e) => setAmount(e.target.value)}  className='form-control'/>
-  </div>
-  <div className="form-group mb-3">
-  <label htmlFor="card-number">Card Number:</label>
-  <div className="input-group d-flex justify-content-center">
-    <div className="input-group-prepend mb-3">
-      <span className="input-group-text mb-3">
-        METHOD OF PAY: 
-        <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa"  />
-      </span>
+    <div className="mb-4">
+      <label htmlFor="amount" className="block text-gray-700 text-sm font-bold mb-2">
+        Amount to send:
+      </label>
+      <input
+        type="number"
+        id="amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+      />
     </div>
+    <div className="mb-4">
+      <label htmlFor="card-number" className="block text-gray-700 text-sm font-bold mb-2">
+        Card Number:
+      </label>
+      <div className="flex items-center justify-center mb-2">
+        <span className="mr-2">METHOD OF PAY:</span>
+        <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" />
+      </div>
+      <div id="card-number" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <CardNumberElement options={{ style: { base: { fontSize: '16px' } } }} />
+      </div>
     </div>
-    <div id="card-number" className="form-control mb-3">
-    <CardNumberElement options={{ style: { base: { fontSize: '16px' } } }} />
+    <div className="mb-4">
+      <label htmlFor="expiry" className="block text-gray-700 text-sm font-bold mb-2">
+        Expiry Date:
+      </label>
+      <div id="expiry" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <CardExpiryElement />
+      </div>
     </div>
-  
+    <div className="mb-6">
+      <label htmlFor="cvc" className="block text-gray-700 text-sm font-bold mb-2">
+        CVC:
+      </label>
+      <div id="cvc" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <CardCvcElement />
+      </div>
+    </div>
+    <div className="flex items-center justify-center">
+      <button
+        type="submit"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        Recargar Wallet
+      </button>
+    </div>
+  </form>
 </div>
-  <div className="form-group mb-3">
-    <label htmlFor="expiry">Expiry Date:</label>
-    <div id="expiry" className="card-expiry form-control" >
-      <CardExpiryElement />
-    </div>
-  </div>
-  <div className="form-group mb-3">
-    <label htmlFor="cvc">CVC:</label>
-    <div id="cvc" className="card-cvc form-control">
-      <CardCvcElement />
-    </div>
-  </div>
-  <button type="submit" className="pay-button buttonPay">
-    Pay
-  </button>
-    </form>
-    </div>
-    
   
- 
+ <Footer/>
   </>
        
   );

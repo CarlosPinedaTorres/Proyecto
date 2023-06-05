@@ -7,7 +7,6 @@ djangorestframework
 django-cors-headers
 python-decouple
 Pillow
-psycopg2
 djangorestframework-simplejwt
 django-extensions==3.2.1
 stripe==5.4.0

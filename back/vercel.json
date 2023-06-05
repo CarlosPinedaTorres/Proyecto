@@ -1,6 +1,7 @@
 {
     "functions": {
       "GameMaster/wsgi.py": {
+        "includeFiles": "**"
       }
     },
     "rewrites": [

@@ -1,14 +1,13 @@
 {
-    "builds": [
-      {
-        "src": "GameMaster/wsgi.py",
-        "use": "@vercel/python"
+    "functions": {
+      "GameMaster/wsgi.py": {
+        "runtime": "@vercel/python@3.9"
       }
-    ],
-    "routes": [
+    },
+    "rewrites": [
       {
-        "src": "/(.*)",
-        "dest": "GameMaster/wsgi.py"
+        "source": "/(.*)",
+        "destination": "GameMaster/wsgi.py"
       }
     ]
-}
+  }

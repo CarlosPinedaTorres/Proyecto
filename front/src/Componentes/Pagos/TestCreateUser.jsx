@@ -4,15 +4,19 @@ import Select from 'react-select';
 import { Contexto } from "../../Context/Contexto";
 import { Navbar } from '../Navbar';
 import { Footer } from '../Footer/Footer';
-
-
+import { Dialog, Transition } from '@headlessui/react';
+import { Button as MuiButton,Modal} from '@mui/material';
+import { useNavigate} from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const TestCreateUser = () => {
-  const { user } = useContext(Contexto);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const { user,ObtainAccount,account,handleMyGamesClick ,logoutUser } = useContext(Contexto);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState('');
   const clientSecret = 'sk_test_51N6e2ZLomp5j2gtn09duzxYVkrz9mkuct9TaAzzzhT1PvlQoltWoAu6ny50GmqMZL6GsR8fYY5AuI0b2ONH0vYfV00Ph9vKMyL'
-
+  
 
   const handleCountryChange = (selectedOption) => {
     setSelectedCountry(selectedOption);
@@ -24,10 +28,21 @@ export const TestCreateUser = () => {
     { value: 'us', label: 'Estados Unidos', currency: 'USD' },
 
   ];
+  const [email, setEmail] = useState('')
+  const emailUser = async (id_user) => {
 
+    const response = await fetch(`${apiUrl}getEmailUser/${id_user}/`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await response.json();
+    console.log(data)
+    setEmail(data)
+  }
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const response = await fetch('http://localhost:8000/api/userStripe/', {
+    const response = await fetch(`${apiUrl}api/userStripe/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -44,11 +59,144 @@ export const TestCreateUser = () => {
     });
 
     const data = await response.json();
+    if (response.status === 200) {
+      toast.success('Se ha creado correctamente tu cuenta de stripe', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-white-500 text-black font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-green-200',
+      });
+      navigate("/mygames")
+    } else {
+      toast.error('Ocurrio un error al crear la cuenta', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-red-500 text-white font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-red-200',
+      });
+    }
     console.log(data)
   }
+  useEffect(() => {
+    emailUser(user['user_id'])
+  
+ 
+  }, [])
+  const [modalOpen, setModalOpen] = useState(false);
+
+
+  const handleModalOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
+  const [visto, setVisto] = useState(false);
+  const ObtainInfoLog = async (id_user) => {
+    try {
+      let response = await fetch(`${apiUrl}getInfoLogueado/${id_user}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      let data = await response.json();
+  
+      console.log(data.noVisto); // Verifica que el valor de data.noVisto sea correcto
+  
+  
+      setVisto(data.noVisto);
+  
+    } catch (error) {
+      console.log('Error en la solicitud:', error);
+    }
+  };
+  useEffect(() => {
+    if(user){
+      ObtainInfoLog(user['user_id'])
+    }
+  
+  }, [])
+  useEffect(() => {
+    if(user){
+      ObtainAccount(user['user_id']);
+    }
+  }, [])
+
+
+  
+const goPays = () => {
+  navigate("/mypays")
+}
+  const goStripeMoney = () => {
+    navigate("/test1")
+  }
+  const goStripe=()=>{
+    navigate("/create-user-stripe")
+  }
+  const navigate=useNavigate()
   return (
     <>
-<Navbar/>
+<Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                Mi cuenta
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+               {account.wallet &&
+                <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis pagos
+            </MuiButton>
+              }
+              {account.wallet &&
+                <MuiButton onClick={()=>goStripeMoney()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+               Ingresar Dinero
+            </MuiButton>
+              }
+           
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis juegos
+              </MuiButton>
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+    <Navbar handleModalOpen={handleModalOpen} visto={visto} />
 <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
   <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-2xl">
     <form onSubmit={handleSubmit} className="mb-3 mt-4">
@@ -62,6 +210,10 @@ export const TestCreateUser = () => {
           type="text"
           name="name"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        
+          value={user['username'] ? user['username'] : ''
+          }
+
         />
       </div>
       <div className="mb-4">
@@ -71,6 +223,7 @@ export const TestCreateUser = () => {
         <input
           type="text"
           name="email"
+          value={email.email}
           placeholder="Email"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
@@ -80,7 +233,9 @@ export const TestCreateUser = () => {
           Telefono
         </label>
         <input
+
           type="text"
+          required
           name="phone"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
@@ -92,6 +247,7 @@ export const TestCreateUser = () => {
           onChange={handleCountryChange}
           placeholder="Selecciona un país"
           name="pais"
+          required
           className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
         {selectedCurrency && <p>Moneda seleccionada: {selectedCurrency}</p>}
@@ -102,6 +258,7 @@ export const TestCreateUser = () => {
         </label>
         <input
           type="text"
+          required
           name="city"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         />
@@ -111,6 +268,7 @@ export const TestCreateUser = () => {
           Calle:
         </label>
         <input
+          required
           type="text"
           name="calle"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -121,6 +279,7 @@ export const TestCreateUser = () => {
           Codigo Postal:
         </label>
         <input
+          required
           type="text"
           name="CP"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -137,67 +296,7 @@ export const TestCreateUser = () => {
     </form>
   </div>
 </div>
-      {/* <div className=" vh-100 d-flex justify-content-center align-items-center">
-        <div className="container">
-          <div className="row d-flex justify-content-center">
-            <div className="col-12 col-md-8 col-lg-6">
-              <div className="border border-3 border-primary"></div>
-              <div className="card bg-white shadow-lg">
-                <div className="card-body p-5">
-                  <form className="mb-3 mt-md-4"  onSubmit={handleSubmit} >
-                    <h2 className="fw-bold mb-2 text-uppercase ">Crear Cuenta en Stripe</h2>
-                    <p className=" mb-5">Please enter your information here!</p>
-                    <div className="mb-3">
-                      <label htmlFor="name" className="form-label ">Introduce tu nombre:</label>
-                      <input type="text" name='name' className="form-control" />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="email" className="form-label ">Email</label>
-                      <input type="text" className="form-control" name="email" placeholder="Email" />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="phone" className="form-label ">Telefono</label>
-                      <input type="text" className="form-control" name="phone" />
-                    </div>
-                    <div className="mb-3">
-                      <Select
-                        options={countries}
-                        value={selectedCountry}
-                        onChange={handleCountryChange}
-                        placeholder="Selecciona un país"
-                        name='pais'
-                      /> {selectedCurrency && (
-                        <p>Moneda seleccionada: {selectedCurrency}</p>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="city" className="form-label ">Ciudad</label>
-                      <input type="text" className="form-control" name="city" />
-                    </div>
-                    
-                    <div className="mb-3">
-                      <label htmlFor="calle" className="form-label ">Calle:</label>
-                      <input type="text" className="form-control" name="calle" />
-                    </div>
-              
-                    <div className="mb-3">
-                      <label htmlFor="CP" className="form-label ">Codigo Postal:</label>
-                      <input type="text" className="form-control" name="CP" />
-                    </div>
-        
-                    <div className="d-grid">
-                      <button className="btn btn-outline-dark" type="submit" >Crear Usuario</button>
-                    </div>
-                  </form>
-                
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
+     
 
      <Footer/>
     </>

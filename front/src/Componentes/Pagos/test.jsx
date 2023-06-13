@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState,useContext } from 'react';
 import axios from 'axios';
 import { Footer } from '../Footer/Footer';
-
+import { Contexto } from '../../Context/Contexto';
 export const Test = () => {  
   const [customerEmail, setCustomerEmail] = useState('');
   const [productName, setProductName] = useState('');
@@ -29,51 +29,11 @@ export const Test = () => {
       console.error(error);
     }
   };
-
+const {}=useContext(Contexto)
   return (
-    // <form onSubmit={handleSubmit}>
-    //   <div>
-    //     <label htmlFor="customer-email">Email del cliente:</label>
-    //     <input
-    //       id="customer-email"
-    //       type="email"
-    //       value={customerEmail}
-    //       onChange={(event) => setCustomerEmail(event.target.value)}
-    //       required
-    //     />
-    //   </div>
-    //   <div>
-    //     <label htmlFor="product-name">Nombre del producto:</label>
-    //     <input
-    //       id="product-name"
-    //       type="text"
-    //       value={productName}
-    //       onChange={(event) => setProductName(event.target.value)}
-    //       required
-    //     />
-    //   </div>
-    //   <div>
-    //     <label htmlFor="product-description">Descripción del producto:</label>
-    //     <textarea
-    //       id="product-description"
-    //       value={productDescription}
-    //       onChange={(event) => setProductDescription(event.target.value)}
-    //       required
-    //     />
-    //   </div>
-    //   <div>
-    //     <label htmlFor="product-price">Precio del producto:</label>
-    //     <input
-    //       id="product-price"
-    //       type="number"
-    //       value={productPrice}
-    //       onChange={(event) => setProductPrice(event.target.value)}
-    //       required
-    //     />
-    //   </div>
-    //   <button type="submit">Pagar</button>
-    // </form>
+    
     <>
+    
     <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
   <div className="mb-4">
     <label

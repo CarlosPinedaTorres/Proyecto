@@ -46,14 +46,16 @@ class Juegos(models.Model):
     plataformas=models.ManyToManyField(Plataformas,blank=True, null=True)
     genero=models.ManyToManyField(Genero,blank=True, null=True)
     idiomas=models.ManyToManyField(Idiomas,blank=True, null=True)
-    publicacion=models.DateField(verbose_name="Fecha lanzamiento",blank=True, null=True)
+    publicacion = models.DateField(verbose_name="Fecha lanzamiento", default=timezone.now().date(), blank=True, null=True)
     num_llaves=models.IntegerField(blank=True, null=True)
     publicado=models.DateField(verbose_name="Publicacion de la venta",blank=True, null=True)
-    precio_venta_final=models.DecimalField(max_digits=8, decimal_places=2,verbose_name='precio final',blank=True, null=True)
+    precio_venta_final=models.DecimalField(max_digits=8, decimal_places=2,verbose_name='precio final',blank=True, null=True,default=0)
     precio = models.DecimalField(max_digits=8, decimal_places=2,blank=True, null=True)
-    precio_mercado=models.DecimalField(max_digits=8,decimal_places=2,blank=True,null=True)
+    precio_mercado=models.DecimalField(max_digits=8,decimal_places=2,blank=True,null=True,default=0)
     activar=models.BooleanField(default=False)
     vendido=models.BooleanField(default=False)
+    image=models.TextField(null=True,blank=True)
+    contador=models.IntegerField(default=0)
     class Meta:
         verbose_name='Juego'
         verbose_name_plural ='Juegos'
@@ -84,7 +86,7 @@ class PriceHistory(models.Model):
         super().save(*args, **kwargs)
 class userPagos(models.Model):
     id_user=models.ForeignKey(Logueado,on_delete=models.CASCADE,null=True)
-    id_juego = models.ForeignKey(Juegos, on_delete=models.CASCADE, null=True)
+    id_juego = models.ForeignKey(Juegos, on_delete=models.CASCADE, null=True,blank=True)
     precio = models.DecimalField(max_digits=8, decimal_places=2)
     fecha = models.DateTimeField(auto_now_add=True)
     tipo=models.CharField(max_length=500,blank=True, null=True)

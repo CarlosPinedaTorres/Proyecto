@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-i1#-*skx5khje77q-k78@hli#$!ldklpg1-gquol^5dlvlt-*o
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+# Desplegar
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'users.NewUser'
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'django.contrib.sites',
     'games',
     'users',
     'rest_framework',
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'GameMaster.urls'
@@ -101,16 +103,7 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#   'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': 'neondb',
-#     'USER': 'CarlosPinedaTorres',
-#     'PASSWORD': 'juXeQV7aYyW3',
-#     'HOST': 'ep-odd-water-421315.eu-central-1.aws.neon.tech',
-#     'PORT': '5432',
-#   }
-# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -150,12 +143,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
+# MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
+# STATIC_TMP = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR,'media/')
+STATIC_TMP = os.path.join(BASE_DIR, 'static')
+
+os.makedirs(STATIC_TMP, exist_ok=True)
+os.makedirs(STATIC_ROOT, exist_ok=True)
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-
 
 
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
@@ -178,13 +176,25 @@ REST_FRAMEWORK ={
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+
 # CSRF_TRUSTED_ORIGINGS=['http://localhost:5173']
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'corsheaders',
+]
 
-
-
+CSRF_TRUSTED_ORIGINS = ['https://git.heroku.com/gamemasterss.git']
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=80),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -226,10 +236,10 @@ SIMPLE_JWT = {
 
 
 
-STRIPE_SECRET_KEY = os.environ.get('SECRET_STRIPE')
-STRIPE_PUBLISHABLE_KEY = os.environ.get('PUBLIC_STRIPE')
+STRIPE_SECRET_KEY = 'sk_test_51N6e2ZLomp5j2gtn09duzxYVkrz9mkuct9TaAzzzhT1PvlQoltWoAu6ny50GmqMZL6GsR8fYY5AuI0b2ONH0vYfV00Ph9vKMyL'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51N6e2ZLomp5j2gtnuPLFhR6cQ8uLeFlTQvjtRll6xUyZoDFHQUw7aHtWsDaZQMmOyriBKEGcLtMcqhQpJXGY8cna00AQpIlIrm'
 
-
+STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 

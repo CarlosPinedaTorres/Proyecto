@@ -3,21 +3,23 @@ import React, { useEffect, useState } from "react";
 import { getGames } from "../Services/Apiservices";
 import jwt_decode from "jwt-decode"
 import { json, useNavigate } from "react-router-dom";
-import io from 'socket.io-client';
-export const ProviderContext = ({ children }) => {
 
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+export const ProviderContext = ({ children }) => {
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   //USER
 
   const [user, setUser] = useState(()=>localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')):null)
   console.log(user)
   const [authTokens, setAuthTokens] = useState(()=>localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')):null)
-  const [loading, setLoading] = useState('false')
+  const [loading, setLoading] = useState(true)
 
   const navigate=useNavigate()
   const updateTokens=async ()=>{
     console.log('update')
-    let response= await fetch('http://localhost:8000/api/token/refresh/',{
+    let response= await fetch(`${apiUrl}api/token/refresh/`,{
       method: 'POST',
       headers:{
         'Content-Type':'application/json'
@@ -26,17 +28,21 @@ export const ProviderContext = ({ children }) => {
     })
     let data= await response.json()
     if(response.status===200){
+      console.log('esta',data)
+      console.log(String(authTokens.access))
       setAuthTokens(data)
       setUser(jwt_decode(data.access))
       localStorage.setItem('authTokens',JSON.stringify(data))
+      // window.location.reload();
     }else{
       logoutUser()
     }
+  
   }
   const loginUser =async(e)=>{
     e.preventDefault()
     
-    let response= await fetch('http://localhost:8000/api/token/',{
+    let response= await fetch(`${apiUrl}api/token/`,{
       method: 'POST',
       headers:{
         'Content-Type':'application/json'
@@ -50,45 +56,91 @@ export const ProviderContext = ({ children }) => {
         localStorage.setItem('authTokens',JSON.stringify(data))
         navigate("/mygames")
     }else{
-      alert('Algo ha salido mal(login)')
+      toast.error('El usuario o la contraseña son incorrectos. O quizas no hayas activado tu cuenta, verifica tu correo', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-red-500 text-white font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-red-200',
+      });
     }
  
   }
   //logout
   const logoutUser=()=>{
-    setAuthTokens(null)
+    console.log("Antes de setAuthTokens:", authTokens);
+    setAuthTokens(null);
+    console.log("Después de setAuthTokens:", authTokens);
     setUser(null)
     localStorage.removeItem('authTokens')
     navigate("/login")
+   
   }
-  
+  useEffect(() => {
+    console.log('aqui',authTokens);
+  }, [authTokens]);
 
 useEffect(()=>{
   console.log('up')
+  // if(loading){
+  //   updateTokens()
+  // }
   let cuatroMinuts=1000*60*4
   let intervalo=setInterval(()=>{
     if(authTokens){
       updateTokens()
     }
-  },60000)
+  },cuatroMinuts)
   return ()=>clearInterval(intervalo)
-},[authTokens,loading])
+},[authTokens])
 
 
 //Registrar
 const Registrar=async(e)=>{
   e.preventDefault()
-  let response=await fetch('http://127.0.0.1:8000/api/user/register/',{
-    method: 'POST',
-    headers:{
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify({'email':e.target.email.value,'username':e.target.username.value,'password':e.target.password.value})
-  })
-  let data=await response.json()
-  console.log(data)
+ 
+    let response = await fetch(`${apiUrl}api/user/register/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'email': e.target.email.value,
+        'username': e.target.username.value,
+        'password': e.target.password.value
+      })
+    });
 
-}
+    let data = await response.json();
+
+    if (response.ok) {
+      toast.success('Se ha completado el registro correctamente', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-green-500 text-white font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-green-200',
+      });
+      navigate("/login")
+    } else {
+      // Si la respuesta tiene un error, mostrar la notificación de error
+      toast.error(data.detail, {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-red-500 text-white font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-red-200',
+      });
+      
+    }
+ 
+ 
+
+
+};
   //testImage
 
   const test = async (e) => {
@@ -97,7 +149,7 @@ const Registrar=async(e)=>{
     formData.append("imagen", e.target.image.files[0], e.target.image.files[0].name);
   
     try {
-      const response = await fetch("http://localhost:8000/api/upload/", {
+      const response = await fetch(`${apiUrl}api/upload/`, {
         method: "POST",
         body: formData,
         headers: {
@@ -114,19 +166,19 @@ const Registrar=async(e)=>{
 //Create_GAMES
   const [plataformas, setPlataformas] = useState([])
   const obtain_Plataformas=async()=>{
-    const response=await fetch("http://localhost:8000/plataformas/")
+    const response=await fetch(`${apiUrl}plataformas/`)
     const data=await response.json()
     setPlataformas(data)}
 
   const [generos, setGeneros] = useState([])
   const obtain_Generos=async()=>{
-    const response=await fetch("http://localhost:8000/generos/")
+    const response=await fetch(`${apiUrl}generos/`)
     const data=await response.json()
     setGeneros(data)}
   
   const [idiomas, setIdiomas] = useState([])
   const obtain_Idiomas=async()=>{
-      const response=await fetch("http://localhost:8000/idiomas/")
+      const response=await fetch(`${apiUrl}idiomas/`)
       const data=await response.json()
       setIdiomas(data)}
   
@@ -181,9 +233,9 @@ const uploadGame = async (e) => {
       // formData.append("publicado", e.target.publicado.value);
       formData.append("precio", e.target.precio.value);
     console.log(user.user_id)
-    
+  
       try {
-        const response = await fetch("http://127.0.0.1:8000/game/upload/", {
+        const response = await fetch(`${apiUrl}game/upload/`, {
           method: "POST",
           body: formData,
           headers: {
@@ -202,7 +254,7 @@ const uploadGame = async (e) => {
 ///MYGAMES
 const [myGamesUser, setmyGamesUser] = useState([])
       const myGames=async()=>{
-        let response=await fetch("http://127.0.0.1:8000/myGames/",{
+        let response=await fetch(`${apiUrl}myGames/`,{
           method:'GET',
           headers:{
             'Content-Type':'application/json',
@@ -211,17 +263,9 @@ const [myGamesUser, setmyGamesUser] = useState([])
 
         })
         let data = await response.json()
-        let gamesWithImages = data.map(game => {
-          if (game.image) {
-            // Convertir la imagen en una URL utilizable
-            const url_portada = URL.createObjectURL(game.url_portada)
-            return {...game, url_portada}
-          } else {
-            return game
-          }
-        })
+        
        
-        setmyGamesUser(gamesWithImages)
+        setmyGamesUser(data)
 
       }
 
@@ -230,7 +274,7 @@ const [myGamesUser, setmyGamesUser] = useState([])
 
 const [allGames, setAllGames] = useState([])
     const ObtainAllGames=async(order_by='')=>{
-      let response=await fetch("http://127.0.0.1:8000/allgames/",{
+      let response=await fetch(`${apiUrl}allgames/`,{
         method:'GET',
         headers:{
           'Content-Type':'application/json',
@@ -280,7 +324,7 @@ const [countries, setCountries] = useState([])
 const [myMoney, setMyMoney] = useState([])
 const obtain_money_wallet=async(id_user)=>{
 console.log('AQUIIII',id_user)
-  let response=await fetch(`http://127.0.0.1:8000/wallet/${id_user}/`,{
+  let response=await fetch(`${apiUrl}wallet/${id_user}/`,{
     method:'GET',
     headers:{
       'Content-Type':'application/json',
@@ -298,7 +342,7 @@ console.log('AQUIIII',id_user)
 /////// Comprobar juegos
 const updatedPrices=async()=>{
 
-  let response=await fetch(`http://127.0.0.1:8000/priceUpdate/`,{
+  let response=await fetch(`${apiUrl}priceUpdate/`,{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
@@ -313,22 +357,23 @@ const updatedPrices=async()=>{
 }
 
 // ////////Actualizar precios (Comentar hasta tener claro el tiempo)
-// useEffect(() => {
+useEffect(() => {
   
-//   const interval = setInterval(() => {
-//     updatedPrices()
-//     console.log('prices')
-//   }, 12000);
-//   return () => {
-//     clearInterval(interval);
-//   };
-// }, [])
+  const interval = setInterval(() => {
+    updatedPrices()
+    console.log('prices')
+  }, 60000);
+  return () => {
+    clearInterval(interval);
+  };
+}, [])
 
 //////////
 // Comprobar ventas
 const obtain_vendidos=async()=>{
+
 try{
-  let response=await fetch(`http://127.0.0.1:8000/active-games/`,{
+  let response=await fetch(`${apiUrl}active-games/`,{
     method:'POST',
     headers:{
       'Content-Type':'application/json',
@@ -340,13 +385,13 @@ try{
   if (data.success) {
     // La wallet se actualizó correctamente
     // Realiza las operaciones necesarias en el frontend
-    alert('Tienes un nuevo pago')
+   
     console.log('La wallet se actualizó correctamente.');
     console.log(data.data); // Datos adicionales devueltos por la API
   } else {
     // No se pudo actualizar la wallet
     // Realiza las operaciones necesarias en el frontend
-    console.log('No se pudo actualizar la wallet.');
+    console.log('No kseeeee pudo actualizar la wallet.');
     console.log(data.message); // Mensaje de error devuelto por la API
   }
   
@@ -354,7 +399,7 @@ try{
   // Manejo de errores de la petición
   console.error('Ocurrió un error:', error);
 }
-   
+
    
 }
 useEffect(() => {
@@ -362,7 +407,7 @@ useEffect(() => {
   const interval = setInterval(() => {
     obtain_vendidos()
     console.log('vender')
-  }, 12000);
+  }, 120000);
   return () => {
     clearInterval(interval);
   };
@@ -375,7 +420,7 @@ useEffect(() => {
 const [ventas, setVentas] = useState([])
 const obtain_ventas = async (idJuego) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/ventas/${idJuego}/`);
+    const response = await fetch(`${apiUrl}ventas/${idJuego}/`);
     const data = await response.json();
     // Aquí puedes trabajar con los datos de las ventas
     console.log(data);
@@ -390,7 +435,7 @@ const obtain_ventas = async (idJuego) => {
 
 const [game, setGame] = useState([])
     const ObtainGame=async(idJuego)=>{
-      let response=await fetch(`http://127.0.0.1:8000/juego/${idJuego}/`,{
+      let response=await fetch(`${apiUrl}juego/${idJuego}/`,{
         method:'GET',
         headers:{
           'Content-Type':'application/json',
@@ -419,7 +464,7 @@ const handleMyGamesClick = () => {
 ////////////////////// obtainNameUSer
 const [userName, setUserName] = useState([])
     const ObtainUserName=async(id_user)=>{
-      let response=await fetch(`http://127.0.0.1:8000/getLogueados/${id_user}/`,{
+      let response=await fetch(`${apiUrl}getLogueados/${id_user}/`,{
         method:'GET',
         headers:{
           'Content-Type':'application/json',
@@ -437,7 +482,7 @@ const [userName, setUserName] = useState([])
 //////////////////////InfoLog
 const [account, setAccount] = useState({ account: '', wallet: '' });
     const ObtainAccount=async(id_user)=>{
-      let response=await fetch(`http://127.0.0.1:8000/getInfoLogueado/${id_user}/`,{
+      let response=await fetch(`${apiUrl}getInfoLogueado/${id_user}/`,{
         method:'GET',
         headers:{
           'Content-Type':'application/json',
@@ -453,7 +498,7 @@ const [account, setAccount] = useState({ account: '', wallet: '' });
     const [visto, setVisto] = useState({ noVisto: false });
     const ObtainInfoLog = async (id_user) => {
       try {
-        let response = await fetch(`http://127.0.0.1:8000/getInfoLogueado/${id_user}/`, {
+        let response = await fetch(`${apiUrl}getInfoLogueado/${id_user}/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -474,7 +519,7 @@ const [account, setAccount] = useState({ account: '', wallet: '' });
 
     const check_visto=async(id_user)=>{
       try{
-      let response=await fetch(`http://127.0.0.1:8000/checkVisto/${id_user}/`,{
+      let response=await fetch(`${apiUrl}checkVisto/${id_user}/`,{
         method:'POST',
         headers:{
           'Content-Type':'application/json',

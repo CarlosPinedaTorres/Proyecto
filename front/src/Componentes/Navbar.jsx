@@ -15,7 +15,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 
 
-export const Navbar = ({handleModalOpen}) => {
+export const Navbar = ({handleModalOpen,visto}) => {
   const {user,logoutUser}=useContext(Contexto)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -38,15 +38,34 @@ export const Navbar = ({handleModalOpen}) => {
         >
           Inicio
         </NavLink>
-        <a href="#" className="text-white">
-          Sobre Nosotros
-        </a>
+       
+        <NavLink
+          to="/informacion"
+          className="text-white"
+          activeClassName="text-blue-400"
+        >
+         Información
+        </NavLink>
+        {!user &&
+        <NavLink
+          to="/login"
+          className="text-white"
+          activeClassName="text-blue-400"
+        >
+         Login
+        </NavLink>}
         {user && (
+           
           <IconButton
             onClick={handleModalOpen}
             className="text-white focus:outline-none"
           >
             <AccountCircleIcon fontSize="large" />
+            {visto && (
+              <span className="ml-2 bg-red-500 text-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                ●
+              </span>
+            )}
           </IconButton>
         )}
       </div>
@@ -59,7 +78,7 @@ export const Navbar = ({handleModalOpen}) => {
           <FontAwesomeIcon icon={faBars} />
         </button>
         {isMenuOpen && (
-          <div className="absolute left-0 mt-2 w-48 bg-blue-900 rounded-lg py-2 space-y-2">
+          <div className="z-50 absolute left-0 mt-2 w-48 bg-blue-900 rounded-lg py-2 space-y-2">
       <NavLink
   to="/home"
   className="block text-white px-4 py-2"

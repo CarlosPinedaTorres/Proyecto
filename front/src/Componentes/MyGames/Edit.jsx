@@ -6,21 +6,26 @@ import { Contexto } from '../../Context/Contexto';
 import { Footer } from '../Footer/Footer';
 import { Dialog, Transition } from '@headlessui/react';
 import { Button as MuiButton,Modal} from '@mui/material';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PlataformasNames } from './PlataformasNames';
 export const Edit = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  console.log('aqui,editar juego')
   const navigate=useNavigate()
   const [selectedFile, setSelectedFile] = useState(null)
   const [nombreChange, setNameChange] = useState(null)
   const [descripcion, setDescripcion] = useState(null)
-  const [publicacion, setPublicacion] = useState(null)
+
   const [numLlaves, setnumLlaves] = useState(null)
-  const [publicado, setpublicado] = useState(null)
+  
   const [pVentaFinal, setpVentaFinal] = useState(null)
   const [precio, setprecio] = useState(null)
   const [plataformasChange, setplataformas] = useState(null)
   const [generosChange, setGenerosChange] = useState(null)
   const [idiomasChange, setIdiomasChange] = useState(null)
   const goStripe=()=>{
-    navigate("/create-user-stripe")
+    navigate("/createuserstripe")
   }
   
   const [fectAll, setfectAll] = useState({
@@ -42,7 +47,7 @@ export const Edit = () => {
     const [plataformas, setPlataformas] = useState([])
     
     const obtain_Plataformas=async()=>{
-    const response=await fetch("http://localhost:8000/plataformas/")
+    const response=await fetch(`${apiUrl}plataformas/`)
     const data=await response.json()
     console.log('dentro de obtainPlataformas')
     setPlataformas(data)
@@ -52,7 +57,7 @@ export const Edit = () => {
     }
     const [generos, setGeneros] = useState([])
     const obtain_Generos=async()=>{
-      const response=await fetch("http://localhost:8000/generos/")
+      const response=await fetch(`${apiUrl}generos/`)
       const data=await response.json()
       setGeneros(data)
       setfectAll(prevState => ({ ...prevState, gen: true }))
@@ -61,7 +66,7 @@ export const Edit = () => {
     
     const [idiomas, setIdiomas] = useState([])
     const obtain_Idiomas=async()=>{
-        const response=await fetch("http://localhost:8000/idiomas/")
+        const response=await fetch(`${apiUrl}idiomas/`)
         const data=await response.json()
         setIdiomas(data)
         setfectAll(prevState => ({ ...prevState, idioma: true }))
@@ -76,14 +81,14 @@ export const Edit = () => {
     const [loading, setLoading] = useState(true)
       const [vendedor, setVendedor] = useState('')
     const obtainInfo=async()=>{
-      const response=await fetch(`http://localhost:8000/getInfoGame/${id}/`)
+      const response=await fetch(`${apiUrl}getInfoGame/${id}/`)
         const data=await response.json()
         setInfo(data)
         console.log(data)
       
     }
     const obtainVendedor=async()=>{
-      const response=await fetch(`http://127.0.0.1:8000/getNameVendedor/${info.vendedor}/`)
+      const response=await fetch(`${apiUrl}getNameVendedor/${info.vendedor}/`)
         const data=await response.json()
         setVendedor(data.nombre_usuario)
         console.log(data.nombre_usuario)
@@ -135,23 +140,7 @@ export const Edit = () => {
       setDescripcion(event.target.value)
       info.descripcion=event.target.value
     }
-    const publicacionChange=(event)=>{
-      // console.log(event.target.value)
-      setPublicacion(event.target.value)
-      info.publicacion=event.target.value
-    }
-    const numLlavesChange=(event)=>{
-      // console.log(event.target.value)
-      setnumLlaves(event.target.value)
-      info.num_llaves=event.target.value
-    }
-    
-
-    const precioChange=(event)=>{
-      // console.log(event.target.value)
-      setprecio(event.target.value)
-      info.precio=event.target.value
-    }
+  
     
     const PlataformasChange=(event)=>{
       const plataformasSeleccionadas = Array.from(event.target.selectedOptions).map((option) => option.value);
@@ -204,13 +193,51 @@ export const Edit = () => {
       console.log(event.target.files[0])
       setSelectedFile(event.target.files[0])
     }
+
+
+    function resizeImage(file, maxWidth, maxHeight) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let width = img.width;
+            let height = img.height;
+    
+            if (width > height) {
+              if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+              }
+            }
+    
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            const resizedImageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            resolve(resizedImageDataUrl);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
     const updateGame = async (e) => {
       e.preventDefault();
       const formData = new FormData();
-      if(selectedFile!=null){
-        console.log(selectedFile)
-        formData.append('url_portada',selectedFile,selectedFile.name)
-      }
+      if (e.target.url_portada.files[0]) {
+        const maxWidth = 800;
+        const maxHeight = 800;
+        const resizedImageDataUrl = await resizeImage(e.target.url_portada.files[0], maxWidth, maxHeight);
+          formData.append('image', resizedImageDataUrl);
+        }
       if(nombreChange!=null){
         console.log(nombreChange)
         formData.append('nombre',nombreChange)
@@ -241,26 +268,10 @@ export const Edit = () => {
         console.log(descripcion)
         formData.append('descripcion',descripcion)
       }
-      if(publicacion!=null){
-        console.log(publicacion)
-        formData.append('publicacion',publicacion)
-      }
-      if(numLlaves!=null){
-        console.log(numLlaves)
-        formData.append('num_llaves',numLlaves)
-      }
-      if(publicado!=null){
-        console.log(publicado)
-        formData.append('publicado',publicado)
-      }
-      if(pVentaFinal!=null){
-        console.log(pVentaFinal)
-        formData.append('precio_venta_final',idiomas)
-      }
-      if(precio!=null){
-        console.log(precio)
-        formData.append('precio',precio)
-      }
+    
+   
+     
+      
       
       setfectAll({
         'gen':false,
@@ -269,7 +280,7 @@ export const Edit = () => {
       })
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/games/${id}/`, {
+        const response = await fetch(`${apiUrl}games/${id}/`, {
           method:"PUT",
           body: formData,
           headers:{
@@ -284,6 +295,14 @@ export const Edit = () => {
         localStorage.removeItem('generos')
         localStorage.removeItem('idiomas')
         localStorage.removeItem('infoGame')
+        toast.success('Se ha editado correctamente la informacion', {
+          position: toast.POSITION.TOP_CENTER,
+          autoClose: 3000, // Duración de la notificación en milisegundos
+          hideProgressBar: true, // Ocultar barra de progreso
+          className: 'bg-green-500 text-white font-medium rounded-md shadow-lg p-4',
+          bodyClassName: 'text-sm',
+          progressClassName: 'bg-green-200',
+        });
       } catch (error) {
         console.error(error);
       }
@@ -302,7 +321,7 @@ export const Edit = () => {
       setLoading(false)
     }, [])
     useEffect(() => {
-      if (info){
+      if (info!=""){
         obtainVendedor()
       }
    
@@ -330,24 +349,12 @@ export const Edit = () => {
     useEffect(() => {
       ObtainAccount(user['user_id']);
     }, []);   
-    // useEffect(() => {
-    
-    //   console.log('2_useffect')
-   
-    //     if(info!=null){
-    //       console.log('dentro_genero')
-    //       namesG()
-    //       namesI()
-    //       namesP()
-    //     }
-    //   console.log('hola2')
-
-    // }, [fectAll])
+ 
     
     useEffect(() => {
-  
+  if(info!=""){
       obtain_money_wallet(user['user_id'])
-      
+  }
     }, [])
   return (
     <>
@@ -436,6 +443,8 @@ export const Edit = () => {
               </div>
 
               <div className="space-y-5">
+                
+            
                 <div>
                   <label
                     htmlFor="plataformas"
@@ -501,54 +510,12 @@ export const Edit = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label
-                    htmlFor="publicacion"
-                    className="block mb-1 font-semibold text-dark"
-                  >
-                    Publicación:
-                  </label>
-                  <input
-                    type="date"
-                    value={info.publicacion}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    onChange={publicacionChange}
-                    name="publicacion"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="num_llaves"
-                    className="block mb-1 font-semibold text-dark"
-                  >
-                    Número de llaves:
-                  </label>
-                  <input
-                    type="text"
-                    value={info.num_llaves}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    onChange={numLlavesChange}
-                    name="num_llaves"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="precio"
-                    className="block mb-1 font-semibold text-dark"
-                  >
-                    Precio:
-                  </label>
-                  <input
-                    type="text"
-                    value={info.precio}
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    onChange={precioChange}
-                    name="precio"
-                  />
-                </div>
+             
+               
+              
               </div>
               <div className="flex justify-end">
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="submit">Crear</button>
+            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="submit">Editar</button>
           </div>
             </form>
           </div>
@@ -578,7 +545,7 @@ export const Edit = () => {
           <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
             <div className="modal-content">
               <h3 className="modal-title text-center text-2xl font-semibold mb-4">
-                My Account
+               Mi cuenta
               </h3>
               {account.wallet ? (
                 <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
@@ -593,7 +560,7 @@ export const Edit = () => {
                 Logout
               </MuiButton>
               <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
-                My Games
+                Mis juegos
               </MuiButton>
               <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Cerrar Modal

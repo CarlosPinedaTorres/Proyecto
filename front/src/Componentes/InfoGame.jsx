@@ -1,15 +1,19 @@
-import React, { useContext, useEffect, useState, useRef, useReducer } from "react";
+import React, { useContext, useEffect, useState, useRef} from "react";
 import { Dialog, Transition } from '@headlessui/react';
-import { useParams, NavLink } from "react-router-dom";
+import { useParams, NavLink ,useNavigate} from "react-router-dom";
 import { Contexto } from "../Context/Contexto";
 import { Fragment } from 'react';
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer/Footer";
 import { Button as MuiButton,Modal} from '@mui/material';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Scope } from "../Scope/Scope";
 
 export const InfoGame = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  // console.log('aqui,infogames')
+const navigate=useNavigate()
 const [numLlavesSeleccionadas, setNumLlavesSeleccionadas] = useState(0);
 const [precioPropuesto, setPrecioPropuesto] = useState(0);
   const id = useParams();
@@ -26,13 +30,15 @@ const [precioPropuesto, setPrecioPropuesto] = useState(0);
 const [compra, setComprar] = useState(true)
   const [game, setGame] = useState([])
   const goStripe=()=>{
-    navigate("/create-user-stripe")
+    navigate("/createuserstripe")
   }
   
-
+const goLogin=()=>{
+  navigate("/login")
+}
   const ObtainGame = async (idJuego) => {
     console.log('dentro', idJuego)
-    let response = await fetch(`http://127.0.0.1:8000/juego/${idJuego}/`, {
+    let response = await fetch(`${apiUrl}juego/${idJuego}/`, {
 
       method: 'GET',
       headers: {
@@ -48,7 +54,7 @@ const [compra, setComprar] = useState(true)
   }
   const obtain_ventas = async (idJuego) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/ventas/${idJuego}/`);
+      const response = await fetch(`${apiUrl}ventas/${idJuego}/`);
       const data = await response.json();
       // Aquí puedes trabajar con los datos de las ventas
       console.log(data);
@@ -64,9 +70,18 @@ const [compra, setComprar] = useState(true)
     // console.log(num_llaves.current.value)
     if(game.precio *num_llaves.current.value>myMoney){
       console.log('noMoney')
-      setComprar(false)}else{
+      setComprar(false)}else if(game.num_llaves==0){
+        toast.success('No hay llaves disponibles', {
+          position: toast.POSITION.TOP_CENTER,
+          autoClose: 3000, // Duración de la notificación en milisegundos
+          hideProgressBar: true, // Ocultar barra de progreso
+          className: 'bg-white-500 text-black font-medium rounded-md shadow-lg p-4',
+          bodyClassName: 'text-sm',
+          progressClassName: 'bg-green-200',
+        });
+      }else{
     console.log(final_price.current.value)
-    let response = await fetch("http://127.0.0.1:8000/update-wallets/", {
+    let response = await fetch(`${apiUrl}update-wallets/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -83,7 +98,19 @@ const [compra, setComprar] = useState(true)
     })
     let data = await response.json()
     await obtain_money_wallet(user['user_id']);
+    if (response.ok) {
+      toast.success('Compra realizada con exito', {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000, // Duración de la notificación en milisegundos
+        hideProgressBar: true, // Ocultar barra de progreso
+        className: 'bg-green-500 text-white font-medium rounded-md shadow-lg p-4',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-green-200',
+      });
+      navigate("/mygames")
+    }
     await ObtainGame(id.id)
+    
     console.log(data)
   }
 
@@ -115,12 +142,16 @@ const [compra, setComprar] = useState(true)
 
   useEffect(() => {
     console.log('SEGUNDO', game)
-    console.log(user['user_id'])
+    // console.log(user['user_id'])
+    if(user){
     obtain_money_wallet(user['user_id'])
-    if(game.length>0){
+    }
+    if(game!=''){
     ObtainUserName(game.vendedor)
     }
+    console.log(game)
   }, [game])
+
 
   useEffect(() => {
     console.log('T', game)
@@ -139,7 +170,9 @@ const [compra, setComprar] = useState(true)
 
   }, [gameLoaded])
   useEffect(() => {
+    if(user){
     ObtainAccount(user['user_id']);
+    }
   }, []);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -151,9 +184,43 @@ const [compra, setComprar] = useState(true)
   const handleModalClose = () => {
     setModalOpen(false);
   };
+
+  const goPays = () => {
+    navigate("/mypays")
+  }
+  const [visto, setVisto] = useState(false);
+  const ObtainInfoLog = async (id_user) => {
+    try {
+      let response = await fetch(`${apiUrl}getInfoLogueado/${id_user}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      let data = await response.json();
+  
+      console.log(data.noVisto); // Verifica que el valor de data.noVisto sea correcto
+  
+  
+      setVisto(data.noVisto);
+  
+    } catch (error) {
+      console.log('Error en la solicitud:', error);
+    }
+  };
+  useEffect(() => {
+    if(user){
+      ObtainInfoLog(user['user_id'])
+    }
+  
+  }, [])
+  const goStripeMoney = () => {
+    navigate("/test1")
+  }
   return (
     <>
-      <Navbar handleModalOpen={handleModalOpen} />
+     <Navbar handleModalOpen={handleModalOpen} visto={visto} />
     
 
       {game !== null && (
@@ -162,7 +229,7 @@ const [compra, setComprar] = useState(true)
       <div className="bg-gradient-to-r from-blue-600 to-green-600 shadow-lg rounded-xl p-6 w-full sm:w-4/5">
         <div className="flex flex-col sm:flex-row items-center justify-between mx-auto">
           <img
-            src={game.url_portada ? `http://localhost:8000/${game.url_portada}` : ''}
+            src={game.image}
             className="w-full sm:w-1/3 rounded-xl mb-6 sm:mb-0"
             alt="Portada del juego"
           />
@@ -181,9 +248,12 @@ const [compra, setComprar] = useState(true)
               {renderInfoCard('Llaves y Precio', [game.num_llaves, game.precio])}
               {renderInfoCard('Géneros', game.genero, generos)}
               {renderInfoCard('Desarrollador', userName)}
+              {renderInfoCard('Fecha de Publicación', game.publicacion)}
+              {renderInfoCard('Precio de Mercado', game.precio_mercado)}
               {renderInfoCard('Precio Venta Final', game.precio_venta_final)}
             </div>
             <div className="bg-gray-300 h-px my-5"></div>
+            {user && user['username']!=userName &&
             <div>
             <label htmlFor="llavesInput" className="mb-3 block">
         Cuantas llaves quieres?: {numLlavesSeleccionadas}
@@ -199,8 +269,9 @@ const [compra, setComprar] = useState(true)
         value={numLlavesSeleccionadas}
         onChange={(e) => setNumLlavesSeleccionadas(e.target.value)}
       />
-            </div>
-            <div>
+            </div>}
+           
+            {user && user['username']!=userName && <div>
             <label htmlFor="final_price" className="mb-3 block">
         Indica el precio por el que la quieres vender, te recomiendo entre 1-5 euros: {precioPropuesto}
       </label>
@@ -215,13 +286,31 @@ const [compra, setComprar] = useState(true)
         value={precioPropuesto}
         onChange={(e) => setPrecioPropuesto(e.target.value)}
       />
-            </div>
-            <button
-              onClick={() => comprar(game.precio, game.vendedor, game.id)}
-              className="btn btn-primary mt-2 bg-blue-600 text-white rounded-md py-2 px-4 w-full"
-            >
-              Comprar
-            </button>
+            </div>}
+         
+            {user ? (
+  <div>
+    {user && user['username'] == userName ? null : (
+      <button
+        onClick={() => comprar(game.precio, game.vendedor, game.id)}
+        className="btn btn-primary mt-2 bg-blue-600 text-white rounded-md py-2 px-4 w-full"
+      >
+        Comprar
+      </button>
+    )}
+  </div>
+) : (
+  <div className="mb-3">
+    <p className="text-white">Si quieres comprar llaves de este juego debes de loguearte primero</p>
+    <button
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3"
+      onClick={() => goLogin()}
+    >
+      Sign in
+    </button>
+  </div>
+)}
+
             {!compra && (
               <Transition.Root show={!compra} as={Fragment}>
                 <Dialog open={!compra} onClose={() => setConfirmar(false)}>
@@ -271,7 +360,7 @@ const [compra, setComprar] = useState(true)
           <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
             <div className="modal-content">
               <h3 className="modal-title text-center text-2xl font-semibold mb-4">
-                My Account
+                Mi cuenta
               </h3>
               {account.wallet ? (
                 <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
@@ -282,11 +371,27 @@ const [compra, setComprar] = useState(true)
                   Crear user en stripe
                 </MuiButton>
               )}
+               {account.wallet &&
+                <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis pagos
+                {visto && (
+                  <span className="ml-2 bg-red-500 text-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    ●
+                  </span>
+                )}
+            </MuiButton>
+              }
+              {account.wallet &&
+                <MuiButton onClick={()=>goStripeMoney()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+               Ingresar Dinero
+            </MuiButton>
+              }
+           
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis juegos
+              </MuiButton>
               <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Logout
-              </MuiButton>
-              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
-                My Games
               </MuiButton>
               <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Cerrar Modal

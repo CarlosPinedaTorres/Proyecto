@@ -18,7 +18,7 @@ const ImageCard = ({ imageInfo }) => {
         whileHover={{ scale: 1.1 }}
       >
         <img
-          src={`http://localhost:8000/${image.url_portada}`}
+          src={image.image}
           alt={image.descripcion}
           className="w-full h-64 object-cover rounded-lg mb-4"
         />
@@ -29,10 +29,18 @@ const ImageCard = ({ imageInfo }) => {
             <span className="text-blue-300 mr-2">Precio:</span>
               <span className="text-lg font-bold text-white">${image.precio}</span>
             </div>
+            {image.num_llaves!=0?(
             <div className="flex items-center">
-            <span className="text-blue-300 mr-2">Nº de llaves:</span>
+              
+              <span className="text-blue-300 mr-2">Nº de llaves:</span>
               <span className="text-lg font-bold text-white">{image.num_llaves}</span>
-            </div>
+          
+            </div> ):<div className="flex items-center">
+              
+              <p className="text-lg font-bold text-white">Completo</p>
+          
+            </div>}
+            
           </div>
           <button onClick={()=>goInfoGame(image.id)} className="mt-4 bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
   Más información

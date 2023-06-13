@@ -8,7 +8,7 @@ const PrivateRoutes = () => {
 
   return (
     // Si no existe el usuario se se va a login , si existe sale de aqui y hace lo que debe hacer el route
-    user['is_verified'] ? <Outlet/> : <Navigate to="/login" />
+    user? <Outlet/> : <Navigate to="/login" />
   )
 }
 

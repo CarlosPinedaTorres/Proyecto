@@ -11,7 +11,8 @@ import ImageCard from './PaginaP, MYgames/ImageCard';
 import SidebarMenu from './PaginaP, MYgames/SidebarMenu';
 import { Dialog, Transition } from '@headlessui/react';
 export const PaginaPrincipal = () => {
-
+  const apiUrl = import.meta.env.VITE_API_URL;
+  // console.log(apiUrl)
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [selectedIdiom, setSelectedIdiom] = useState(null);
@@ -48,10 +49,10 @@ export const PaginaPrincipal = () => {
     }
   };
 
-  const ObtainAllGames=async()=>{
+  const ObtainAllGames=async(id_user=0)=>{
 
  
-    let response=await fetch("http://127.0.0.1:8000/allgames/",{
+    let response=await fetch(`${apiUrl}allgames/${id_user}`,{
       method:'GET',
       headers:{
         'Content-Type':'application/json',
@@ -59,17 +60,9 @@ export const PaginaPrincipal = () => {
 
     })
     let data = await response.json()
-    let gamesWithImages = data.map(game => {
-      if (game.image) {
-        // Convertir la imagen en una URL utilizable
-        const url_portada = URL.createObjectURL(game.url_portada)
-        return {...game, url_portada}
-      } else {
-        return game
-      }
-    })
+
    
-    setAllGames(gamesWithImages)
+    setAllGames(data)
 
   }
 
@@ -140,26 +133,34 @@ export const PaginaPrincipal = () => {
  
   
   const goStripe=()=>{
-    navigate("/create-user-stripe")
+    navigate("/createuserstripe")
   }
   
 
   useEffect(() => {
-  
+  if(user){
     obtain_money_wallet(user['user_id'])
-    
+  }
   }, [])
   useEffect(() => {
+    if(user){
     ObtainAccount(user['user_id']);
+    }
   }, []);
   useEffect(() => {
     // Este efecto se ejecuta cuando cambie la dependencia "wallet"
-    if (account.wallet) {
+    if ( user && account.wallet) {
       obtain_money_wallet(user['user_id']);
     }
   }, [myMoney]);
   useEffect(() => {
-    ObtainAllGames();
+    if(user){
+
+    
+    ObtainAllGames(user['user_id']);
+    }else{
+      ObtainAllGames();
+    }
   }, []);
 
 
@@ -173,11 +174,47 @@ const handleToggleSidebar = () => {
 
   // Toggle del estado showFilter
   setShowFilter(!showFilter);
+
+
+
 };
+const goPays = () => {
+  navigate("/mypays")
+}
+const [visto, setVisto] = useState(false);
+const ObtainInfoLog = async (id_user) => {
+  try {
+    let response = await fetch(`${apiUrl}getInfoLogueado/${id_user}/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    let data = await response.json();
+
+    console.log(data.noVisto); // Verifica que el valor de data.noVisto sea correcto
+
+
+    setVisto(data.noVisto);
+
+  } catch (error) {
+    console.log('Error en la solicitud:', error);
+  }
+};
+useEffect(() => {
+  if(user){
+    ObtainInfoLog(user['user_id'])
+  }
+
+}, [])
+const goStripeMoney = () => {
+  navigate("/test1")
+}
   return (
     <>
     <div className="flex flex-col min-h-screen">
-  <Navbar handleModalOpen={handleModalOpen} />
+    <Navbar handleModalOpen={handleModalOpen} visto={visto} />
   
   <div className="mt-4">
         <div className="w-full flex justify-center">
@@ -188,7 +225,7 @@ const handleToggleSidebar = () => {
             {sidebarOpen ? "Cerrar menú" : "Abrir Filtros"}
           </button>
         </div>
-        <div className={`relative ${sidebarOpen ? 'block' : 'hidden'} z-10`}>
+        <div className={`relative ${sidebarOpen ? 'block' : 'hidden'} z-10 `}>
         <SidebarMenu
           sidebarOpen={sidebarOpen}
           showFilter={showFilter}
@@ -200,12 +237,32 @@ const handleToggleSidebar = () => {
           handlePlataformaSelection={handlePlataformaSelection}
           selectedPlataforma={selectedPlataforma}
         >
-            {juegos && <ImageCard imageInfo={juegos} />}
+          {juegos.length>0 ? <ImageCard imageInfo={juegos} />:    <div className="min-h-screen flex items-center justify-center">
+  <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-6">
+    <div className="flex items-center justify-center text-red-500">
+      <i className="fas fa-exclamation-circle text-3xl"></i>
+    </div>
+    <h1 className="mt-4 text-center font-semibold text-xl text-gray-800">No hay juegos disponibles</h1>
+  </div>
+</div>}
           </SidebarMenu>
         </div>
       </div>
       <div className="flex flex-col flex-grow">
-      {!sidebarOpen && juegos.length>0 ? <ImageCard imageInfo={juegos} />:<h1>NO hay juegos con esas caracteristicas</h1>}
+{!sidebarOpen && (
+  juegos.length > 0 ? (
+    <ImageCard imageInfo={juegos} />
+  ) : (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-6">
+        <div className="flex items-center justify-center text-red-500">
+          <i className="fas fa-exclamation-circle text-3xl"></i>
+        </div>
+        <h1 className="mt-4 text-center font-semibold text-xl text-gray-800">No hay juegos disponibles</h1>
+      </div>
+    </div>
+  )
+)}
       </div>
       <Transition appear show={modalOpen} as={React.Fragment}>
       <Dialog
@@ -224,22 +281,40 @@ const handleToggleSidebar = () => {
           <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
             <div className="modal-content">
               <h3 className="modal-title text-center text-2xl font-semibold mb-4">
-                My Account
+                Mi cuenta
               </h3>
               {account.wallet ? (
                 <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                   Wallet: {myMoney}
                 </MuiButton>
+                
+                
               ) : (
                 <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
                   Crear user en stripe
                 </MuiButton>
               )}
+              {account.wallet &&
+                <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis pagos
+                {visto && (
+                  <span className="ml-2 bg-red-500 text-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    ●
+                  </span>
+                )}
+            </MuiButton>
+              }
+               {account.wallet &&
+                <MuiButton onClick={()=>goStripeMoney()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+               Ingresar Dinero
+            </MuiButton>
+              }
+           
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis juegos
+              </MuiButton>
               <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Logout
-              </MuiButton>
-              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
-                My Games
               </MuiButton>
               <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Cerrar Modal

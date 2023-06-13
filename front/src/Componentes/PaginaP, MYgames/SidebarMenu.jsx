@@ -146,7 +146,7 @@ const SidebarMenu = ({ children, sidebarOpen ,showFilter, handleOrderChange ,han
         </div>
       </div>
     </div>
-    <div className="ml-16 bg-gray-900 min-h-screen ">{children}</div>
+    <div className="ml-16 bg-gray min-h-screen ">{children}</div>
   </div>
   );
 };

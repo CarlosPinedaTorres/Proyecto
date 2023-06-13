@@ -1,0 +1,1 @@
+web: gunicorn GameMaster.wsgi --log-file -

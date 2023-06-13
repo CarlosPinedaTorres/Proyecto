@@ -32,10 +32,10 @@ Modal.setAppElement('#root');
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <form onSubmit={loginUser} className="mb-3 mt-4">
             <h2 className="font-bold mb-2 text-uppercase text-center">
-              Welcome to GamesMasters
+              Bienvenido a GamesMasters
             </h2>
             <p className="mb-5 text-center">
-              Please enter your login and password!
+             Introduce tu nombre de usuario y contraseña
             </p>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-bold mb-2">
@@ -69,13 +69,23 @@ Modal.setAppElement('#root');
               </animated.button>
               <div>
                 <p className="mb-5 text-center">
-                  Don't have an account?{' '}
+                  ¿No tienes una cuenta aún?{' '}
                   <NavLink to="/registrar" className="text-blue-500 font-bold">
                     {' '}
-                    Sign Up
+                    Registrarse
+                  </NavLink>
+                </p>
+                <p className="mb-5 text-center">
+                  ¿Has olvidado tu contraseña?{' '}
+                  <NavLink to="/resetPassword" className="text-blue-500 font-bold">
+                    {' '}
+                    Recuperar contraseña
                   </NavLink>
                 </p>
               </div>
+              
+                
+             
             </div>
           </form>
         </div>

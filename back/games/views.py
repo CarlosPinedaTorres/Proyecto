@@ -33,6 +33,18 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 import json
+from django.db import IntegrityError
+from rest_framework.exceptions import APIException
+from django.http import Http404
+from django.contrib.auth.decorators import login_required
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+URL_FRONT = os.environ.get('URL_FRONT')
+#REset password
+
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -84,33 +96,48 @@ class TestUploadImage(APIView):
 #         else:
 #             return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
         
-@api_view(['POST'])
-def uploadNewGame(request):
-    if request.method == 'POST':
+# @api_view(['POST'])
+# def uploadNewGame(request):
+    # if request.method == 'POST':
 
-        print(request.data)
-        print('aqui estoy')
-        form_data = request.data.get('data')  # Obtener los datos adicionales
-        if form_data:
-            data = json.loads(form_data)
-            porcentaje = data.get('media')  # Acceder al campo "suma"
-            id_user=data.get('id_user')
-            user=NewUser.objects.get(id=id_user)
-            logueado=Logueado.objects.get(user=user)
-            logueado.noVisto=True
-            wallet=VirtualWallet.objects.get(id=10)
-            
-            wallet.balance+=Decimal(porcentaje)
-            wallet.save()
-            print(porcentaje)
+    #     print(request.data)
+    #     print('aqui estoy')
+    #     form_data = request.data.get('data')  # Obtener los datos adicionales
+    #     if form_data:
+    #         data = json.loads(form_data)
+    #         porcentaje = data.get('media')  # Acceder al campo "suma"
+    #         id_user=data.get('id_user')
+           
+    #         user=NewUser.objects.get(id=id_user)
+    #         logueado=Logueado.objects.get(user=user)
+    #         logueado.noVisto=True
+    #         # wallet=VirtualWallet.objects.get(id=2)
+    #         wallet=VirtualWallet.objects.get(id=4)
+    #         logueado.noVisto=True
+    #         logueado.save()
+    #         wallet.balance+=Decimal(porcentaje)
+    #         wallet.save()
+    #         pago=userPagos(id_user=logueado,precio=porcentaje,tipo='Crear Juego',visto=False)
+    #         pago.save()
+    #         print(porcentaje)
+    #     serializer = GamesSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class CrearJuego(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
         serializer = GamesSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class UploadPlataforma(APIView):
     permission_classes=[AllowAny]
     parser_classes=[MultiPartParser,FormParser]
@@ -163,11 +190,15 @@ def getMyGames(request):
 # Obtener todos los juegos
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def getAllGames(request):
+def getAllGames(request,id_user):
     order_by = request.query_params.get('order_by')  # Obtén el parámetro de consulta 'order_by'
-
-    juegos = Juegos.objects.all()
-
+ 
+    if(id_user!=0):
+        user=NewUser.objects.get(id=id_user)
+        logueado=Logueado.objects.get(user=user)
+        juegos = Juegos.objects.exclude(vendedor=logueado)  
+    else:
+        juegos = Juegos.objects.all() 
     if order_by:
         if order_by == 'desc':
             juegos = juegos.order_by('-nombre')  # Ordenar de mayor a menor según el campo 'nombre'
@@ -217,22 +248,36 @@ class UpdateGameView(RetrieveUpdateAPIView):
 class UserRegisterView(APIView):
     serializer_class = UserRegisterSerializer
     def post(self, request):
-        user = request.data
-        serializer = self.serializer_class(data=user)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        user_data = serializer.data
-        user = NewUser.objects.get(email=user_data['email'])
-        token = RefreshToken.for_user(user).access_token
-        current_site = get_current_site(request).domain
-        relativeLink = reverse('email-verify')
-        absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
-        email_body = 'Hi '+user.username + \
-            ' Use the link below to verify your email \n' + absurl
-        data = {'email_body': email_body, 'to_email': user.email,
-                'email_subject': 'Verify your email'}
-        Util.send_email(data)
-        return Response(user_data, status=status.HTTP_201_CREATED)
+        try:
+            user = request.data
+            serializer = self.serializer_class(data=user)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            user_data = serializer.data
+            user = NewUser.objects.get(email=user_data['email'])
+            token = RefreshToken.for_user(user).access_token
+            current_site = get_current_site(request).domain
+            relativeLink = reverse('email-verify')
+            absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
+            email_body = 'Hi '+user.username + ' Use the link below to verify your email \n' + absurl
+            data = {'email_body': email_body, 'to_email': user.email, 'email_subject': 'Verify your email'}
+            Util.send_email(data)
+            return Response(user_data, status=status.HTTP_201_CREATED)
+        except IntegrityError as e:
+            error_message = str(e)
+            if 'email' in error_message:
+                raise DuplicateEmailException()
+            elif 'username' in error_message:
+                raise DuplicateNameException()
+            
+class DuplicateNameException(APIException):
+    status_code = 400
+    default_detail = 'El nombre de Empresa ya esta registrado, introduce uno válido'
+    default_code = 'duplicate_name'
+class DuplicateEmailException(APIException):
+    status_code = 400
+    default_detail = 'EL correo que has introducido ya existe por favor introduzca uno valido'
+    default_code = 'duplicate_email'
 # register_view = RegisterView.as_view()
 class VerifyEmail(generics.GenericAPIView):
     def get(self,request):
@@ -298,7 +343,6 @@ stripe.api_key=settings.STRIPE_SECRET_KEY
 # wallet
 stripe.api_key=settings.STRIPE_SECRET_KEY
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
 @transaction.atomic
 
 def crear_cliente_stripe(request):
@@ -459,6 +503,10 @@ def recharge_wallet(request):
 
             # Enviar el correo al cliente
             send_email(logueado.user.email, subject, message)
+            pago=userPagos(id_user=logueado,precio=amount,tipo='Recargar Wallet' ,visto=False)
+            pago.save()
+            logueado.noVisto=True
+            logueado.save()
         return Response({'success': True})
 
     except stripe.error.CardError as e:
@@ -525,13 +573,21 @@ def updateWallet(request):
     vendedor=Logueado.objects.get(id=id_vendedor)
     juego=Juegos.objects.get(id=id_juego)
     juego.num_llaves=juego.num_llaves-int(num_llaves_compradas)
+    # if(juego.num_llaves==0){
+    #     juego.
+    # }
     juego.save()
     venta=Ventas(id_comprador=logueado,id_vendedor=vendedor,id_juego=juego,num_llaves_compradas=num_llaves_compradas,precio_venta_user=precio_venta_user)
     venta.save()
     wallet = VirtualWallet.objects.get(wallet_user=logueado)
     wallet.balance =wallet.balance - amount  
     wallet.save() 
-  
+    pago1=userPagos(id_user=logueado,id_juego=juego,precio=amount,tipo='Compra de llaves',visto=False)
+    pago1.save()
+    pago=userPagos(id_user=vendedor,id_juego=juego,precio=amount,tipo='Venta llaves',visto=False)
+    pago.save()
+    logueado.noVisto=True
+    logueado.save()
     serializer = VirtualWalletSerializer(wallet)
     return Response(serializer.data)
 
@@ -550,7 +606,7 @@ def getAllVentas(request, id_juego):
         
         if id_comprador in compradores:
             compradores[id_comprador]['num_llaves'] += num_llaves
-            compradores[id_comprador]['valor_total'] += venta.precio_venta_user
+            compradores[id_comprador]['valor_total'] = venta.precio_venta_user
         else:
             sumaLlaves += num_llaves
             print(sumaLlaves)
@@ -559,6 +615,7 @@ def getAllVentas(request, id_juego):
                 'num_llaves': num_llaves,
                 'valor_total': venta.precio_venta_user
             }
+        print(compradores)
     for key, value in compradores.items():
         pesoProporcional=value['num_llaves']/sumaLlaves
         precioPonderado=float(pesoProporcional)*float(value['valor_total'])
@@ -593,16 +650,28 @@ def getWallet(request, id_user):
 
 @api_view(['POST'])
 def getJuegosActivados(request):
+    if request.user.is_authenticated:
+        userName = request.user.username
+        print('user',userName)
     juegos_activados = Juegos.objects.filter(activar=True)
     entro=False
+   
     for juego in juegos_activados:
-        if juego.vendido!=True and juego.precio_mercado >= juego.precio_venta_final:
+    
+        
+    
+
+        if juego.vendido!=True and float(juego.precio_mercado) >= juego.precio_venta_final:
             ventas_juego = Ventas.objects.filter(id_juego=juego)
             for venta in ventas_juego:
 
 
 
                 comprador = venta.id_comprador
+                comprador.noVisto=True
+                comprador.save()
+             
+                # logueado=Logueado.objects.get()
                 num_llaves = venta.num_llaves_compradas
                 precio_mercado = juego.precio_mercado
                 
@@ -616,22 +685,57 @@ def getJuegosActivados(request):
                 juego.vendido=True
                 juego.save()
                 entro=True
-                pago=userPagos(id_user=comprador,id_juego=juego,precio=beneficio)
+                pago=userPagos(id_user=comprador,id_juego=juego,precio=beneficio,visto=False,tipo='Llaves vendidas')
                 pago.save()
                 print(f"Comprador: {comprador}, Num. de llaves: {num_llaves}")
+
+
+        elif juego.vendido!=True and juego.contador>=4:
+            ventas_juego = Ventas.objects.filter(id_juego=juego)
+            for venta in ventas_juego:
+
+
+
+                comprador = venta.id_comprador
+                comprador.noVisto=True
+                comprador.save()
+               
+                num_llaves = venta.num_llaves_compradas
+                precio_mercado = juego.precio_mercado
+                
+                beneficio=Decimal(num_llaves)*Decimal(precio_mercado)
+                wallet=VirtualWallet.objects.get(wallet_user=comprador)
+                print(f"{comprador} : {beneficio}")
+                print(f"{comprador} : {wallet}")
+                num_llaves = venta.num_llaves_compradas
+                wallet.balance+=beneficio
+                wallet.save()
+                juego.vendido=True
+                juego.save()
+                entro=True
+                pago=userPagos(id_user=comprador,id_juego=juego,precio=beneficio,visto=False,tipo='Llaves vendidas')
+                pago.save()
+                print(f"Comprador: {comprador}, Num. de llaves: {num_llaves}")
+        if juego.contador>=4:
+            juego.contador=0
+        else:
+            juego.contador+=1
+        juego.save()
     serializer = GamesSerializer(juegos_activados, many=True)
     if entro:
-            return Response({
+           
+        return Response({
             'success': True,
             'message': 'La wallet se actualizó correctamente.',
             'data': serializer.data
         })
+           
     else:
-            return Response({
-            'success': False,
-            'message': 'No se pudo actualizar la wallet.',
-            'data': serializer.data
-        })
+        return Response({
+        'success': False,
+        'message': 'No se pudo actualizar la wallet.',
+        'data': serializer.data
+    })
                
     
   
@@ -730,9 +834,97 @@ def checkVisto(request, id_user):
  
     logueado.noVisto = False
     logueado.save()
-    
+    pays=userPagos.objects.filter(id_user=logueado)
+    for pago in pays:
+        pago.visto=True
+        pago.save()
     return Response(status=status.HTTP_200_OK)
 
+
+
+@api_view(['GET'])
+def infoNewUser(request, id_user):
+    user = NewUser.objects.get(id=id_user)
+   
+    
+    return Response({'email':user.email,})
+
+@api_view(['GET'])
+def nameGame(request, id_juego):
+    juego = Juegos.objects.get(id=id_juego)
+   
+    
+    return Response({'nombre':juego.nombre,})
+
+
+
+@api_view(['DELETE'])
+def deleteGame(request, id_juego):
+    juego = Juegos.objects.get(id=id_juego)
+    if Ventas.objects.filter(id_juego=juego).exists():
+        return Response({'error': 'No se puede eliminar un juego con ventas asociadas'}, status=status.HTTP_400_BAD_REQUEST)
+    else: 
+        nombre_juego = juego.nombre
+        juego.delete()
+        return Response({'nombre': nombre_juego}, status=status.HTTP_200_OK)
+    
+
+# RESET PASSWORD
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth import get_user_model
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+User = get_user_model()
+
+@api_view(['POST'])
+def reset_password_request(request):
+    email = request.data.get('email')
+    if email:
+        user = NewUser.objects.filter(email=email).first()
+        if user:
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            # endpoint=os.environ.get('URL_FRONT')
+            # print(endpoint)
+            reset_url = (f'{URL_FRONT}#/reset-password/confirm/{uid}/{token}/')
+            message = f"Please click the following link to reset your password:\n\n{reset_url}"
+            send_mail(
+                "Password reset request",
+                message,
+                "noreply@example.com",
+                [user.email],
+                fail_silently=False,
+            )
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['POST', 'GET'])
+def reset_password_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            password = request.data.get('password')
+            confirm_password = request.data.get('confirm_password')
+            if password == confirm_password:
+                user.set_password(password)
+                user.save()
+                return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Render the password reset confirmation form
+            return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 ####
 # @api_view(['GET'])
 # def getJuegosActivados(request):

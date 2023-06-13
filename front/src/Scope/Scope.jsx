@@ -1,17 +1,19 @@
 import React from 'react'
-import "../Estilos/test.css"
+// import "../Estilos/test.css"
 import { useEffect, useRef,useContext } from 'react';
 import Chart from 'chart.js/auto';
 import { useState } from 'react';
 import { Contexto } from '../Context/Contexto';
 export const Scope = ({id_juego}) => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  // console.log('aqui,scope')
   const{authTokens}=useContext(Contexto)
   const [prices, setPrices] = useState([])
   let myChart = null;
   const chartRef = useRef();
   const obtain_Price_History=async(id_juego)=>{
     console.log('juego',id_juego)
-    let response=await fetch(`http://127.0.0.1:8000/prices/${id_juego}/`,{
+    let response=await fetch(`${apiUrl}prices/${id_juego}/`,{
     method:'GET',
     headers:{
       'Content-Type':'application/json',
@@ -78,7 +80,7 @@ export const Scope = ({id_juego}) => {
         labels: data.map(row => row.hora),
         datasets: [
           {
-            label: 'Acquisitions by month',
+            label: 'Precios del mercado',
             data: data.map(row => row.precio),
             backgroundColor: 'rgba(75, 192, 192, 0.2)', // Personaliza el color de fondo del área bajo la línea
             borderColor: 'rgba(75, 192, 192, 1)', // Personaliza el color de la línea
@@ -98,7 +100,7 @@ export const Scope = ({id_juego}) => {
             display: true,
             title: {
               display: true,
-              text: 'Fechas', // Personaliza el título del eje X
+              text: 'Meses', // Personaliza el título del eje X
               color: 'rgba(255, 255, 255, 1)', // Personaliza el color del título del eje X
               font: {
                 size: 16, // Personaliza el tamaño de fuente del título del eje X
@@ -152,7 +154,7 @@ export const Scope = ({id_juego}) => {
   };
   return (
     <div className="bg-gray-800 p-4 rounded-md shadow-md">
-      <h2 className="text-white text-xl font-semibold mb-4">Acquisitions by month</h2>
+      <h2 className="text-white text-xl font-semibold mb-4">Precios por mes</h2>
       <div className="relative h-96">
         <canvas ref={chartRef} />
       </div>

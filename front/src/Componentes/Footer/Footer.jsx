@@ -17,7 +17,8 @@ export const Footer = () => {
                 Nos dedicamos a la compra-venta de juegos, funcionamos como
                 acciones, tu inviertes, fijas un precio y nosotros nos
                 encargamos de vender tu producto, ¿sabes cómo funcionan las
-                acciones? funcionamos igual.
+                acciones? Si tienes alguna pregunta ve a nuestro apartado de mas información donde podras descubrir
+                como funcionamos.
               </p>
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 xl:w-1/3 px-4">

@@ -5,11 +5,12 @@ wheel==0.38.1
 whitenoise==6.0.0
 djangorestframework
 django-cors-headers
-python-decouple
+python-decouple==3.8
 Pillow
-psycopg2
 djangorestframework-simplejwt
 django-extensions==3.2.1
 stripe==5.4.0
-
-
+whitenoise
+gunicorn
+psycopg2==2.9.6
+python-dotenv==1.0.0

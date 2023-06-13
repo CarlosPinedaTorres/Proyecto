@@ -5,18 +5,46 @@ import { Form} from "react-bootstrap"
 import { Navbar } from "../Navbar"
 import '../../Estilos/CreateGame.css'
 import { useNavigate } from "react-router-dom"
+import { Dialog, Transition } from '@headlessui/react';
+import { Button as MuiButton, Modal } from '@mui/material';
+import { Footer } from "../Footer/Footer"
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 export const CreateGame= () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [comprar, setComprar] = useState(true)
   const [valor,setValor]=useState(null)
   const [id, setId] = useState(null)
-  const {obtain_Plataformas,plataformas,obtain_Generos,generos,obtain_Idiomas,idiomas,user,obtain_money_wallet,myMoney}=useContext(Contexto)
+  const {obtain_Plataformas,plataformas,obtain_Generos,generos,obtain_Idiomas,idiomas,user,obtain_money_wallet,myMoney,ObtainAccount, account,logoutUser,handleMyGamesClick }=useContext(Contexto)
   const navigate=useNavigate()
+  const [modalOpen, setModalOpen] = useState(false);
+  useEffect(() => {
+    ObtainAccount(user['user_id']);
+
+  }, []);
 
 const goIngresar=()=>{
   navigate("/test1")
 }
+const handleModalOpen = () => {
+  setModalOpen(true);
+};
+
+const handleModalClose = () => {
+  setModalOpen(false);
+};
+const goPays = () => {
+  navigate("/mypays")
+}
 
 
+const goStripe = () => {
+  navigate("/create-user-stripe")
+}
+const goStripeMoney = () => {
+  navigate("/test1")
+}
 
     const handleGenerosChange = (event) => {
       const opcionesSeleccionadas = Array.from(event.target.selectedOptions).map((option) => option.value);
@@ -36,62 +64,96 @@ const goIngresar=()=>{
     const [plataformasSeleccionadas, setPlataformasSeleccionadas] = useState([]);  
     const [generosSeleccionadas, setGenerosSeleccionadas] = useState([]);  
     const [idiomasSeleccionadas, setIdiomasSeleccionadas] = useState([]);  
+
+
+    function resizeImage(file, maxWidth, maxHeight) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let width = img.width;
+            let height = img.height;
+    
+            if (width > height) {
+              if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+              }
+            }
+    
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            const resizedImageDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            resolve(resizedImageDataUrl);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
     const uploadGame = async (e) => {
       e.preventDefault();
       const ids_plataformas= plataformas.filter((plataforma)=>plataformasSeleccionadas.includes(plataforma.nombre)).map((plataforma) => plataforma.id);
       const ids_generos= generos.filter((genero)=>generosSeleccionadas.includes(genero.nombre)).map((genero) => genero.id);
       const ids_idiomas= idiomas.filter((idioma)=>idiomasSeleccionadas.includes(idioma.nombre)).map((idioma) => idioma.id);
-      
-    
-      
+     
       const formData = new FormData();
-      const data = {
-        media:(e.target.precio.value *e.target.num_llaves.value) *0.10,
-        id_user:user['user_id'],
-      };
-      formData.append("data", JSON.stringify(data));
       formData.append("vendedor",e.target.id.value);
-      formData.append("url_portada", e.target.url_portada.files[0], e.target.url_portada.files[0].name);
-      formData.append("nombre", e.target.nombre.value);
-      formData.append("descripcion", e.target.descripcion.value);
-      ids_plataformas.map((id)=>{
-        formData.append("plataformas", id);
-      })
-      ids_generos.map((id)=>{
-          formData.append("genero", id);
-      })
-      ids_idiomas.map((id)=>{
-        formData.append("idiomas", id);
-      })
-      formData.append("publicacion", e.target.publicacion.value);
-      formData.append("num_llaves", e.target.num_llaves.value);
-      // formData.append("publicado", e.target.publicado.value);
-      formData.append("precio", e.target.precio.value);
-    console.log(user.user_id)
-    // console.log(myMoney)
-    if(e.target.precio.value *e.target.num_llaves.value>myMoney){
-      console.log('noMoney')
-      setComprar(false)
-      setValor((e.target.precio.value *e.target.num_llaves.value) *0.10)
-    }else{
-       try {
-        const response = await fetch("http://127.0.0.1:8000/game/upload/", {
-          method: "POST",
-          body: formData,
+          formData.append("nombre", e.target.nombre.value);
+          formData.append("descripcion", e.target.descripcion.value);
+          ids_plataformas.map((id)=>{
+            formData.append("plataformas", id);
+          })
+          ids_generos.map((id)=>{
+              formData.append("genero", id);
+          })
+          ids_idiomas.map((id)=>{
+            formData.append("idiomas", id);
+          })
+          
+          formData.append("num_llaves", e.target.num_llaves.value);
+          
+          formData.append("precio", e.target.precio.value);
+      if (e.target.url_portada.files[0]) {
+        const maxWidth = 800;
+        const maxHeight = 800;
+        const resizedImageDataUrl = await resizeImage(e.target.url_portada.files[0], maxWidth, maxHeight);
+          formData.append('image', resizedImageDataUrl);
+        }
+  
+      const config = {
           headers: {
-            Accept: "application/json",
-          },
-        });
-        const data = await response.json();
-        console.log(data);
-        // navigate("/mygames")
+              'Content-Type': 'multipart/form-data',
+             
+          }
+      };
+      try {
+          await axios.post(`${apiUrl}game/upload/`, formData, config);
+          toast.success('Se ha creado el juego correctamente', {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000, // Duración de la notificación en milisegundos
+            hideProgressBar: true, // Ocultar barra de progreso
+            className: 'bg-green-500 text-white font-medium rounded-md shadow-lg p-4',
+            bodyClassName: 'text-sm',
+            progressClassName: 'bg-green-200',
+          });
       } catch (error) {
-        console.error(error);
+          console.log(error);
       }
-    }
-    
-    
-       }
+  }
+
+  
+  
+       
 
 
   useEffect(() => {
@@ -101,7 +163,7 @@ const goIngresar=()=>{
       obtain_money_wallet(user['user_id'])
       const idLogueado=async()=>{
     
-        let response=await fetch(`http://127.0.0.1:8000/getIdLogueado/${user['user_id']}/`,{
+        let response=await fetch(`${apiUrl}getIdLogueado/${user['user_id']}/`,{
           method: 'GET',
           headers:{
             'Content-Type':'application/json'
@@ -117,9 +179,56 @@ const goIngresar=()=>{
   
   return (
     <>
+    <Transition appear show={modalOpen} as={React.Fragment}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={handleModalClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-lg rounded-md">
+            <div className="modal-content">
+              <h3 className="modal-title text-center text-2xl font-semibold mb-4">
+                Mi cuenta
+              </h3>
+              {account.wallet ? (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                  Wallet: {myMoney}
+                </MuiButton>
+              ) : (
+                <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
+                  Crear user en stripe
+                </MuiButton>
+              )}
+              <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis pagos
+              </MuiButton>
+            
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Mis juegos
+              </MuiButton>
+              <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Logout
+              </MuiButton>
+              <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                Cerrar Modal
+              </MuiButton>
+            </div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+   
     
-  <Navbar/>
-  <div className="flex justify-center mt-3">
+    <Navbar handleModalOpen={handleModalOpen} />
+  <div className="flex justify-center mt-5 mb-5">
   <div className="w-full max-w-2xl">
     <div className="bg-white text-gray-900 shadow-lg rounded-lg">
       <div className="p-5">
@@ -171,10 +280,7 @@ const goIngresar=()=>{
             </select>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="mb-3">
-              <label htmlFor="publicacion" className="block text-sm font-medium text-gray-700">Publicación:</label>
-              <input type="date" className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" name="publicacion" />
-            </div>
+         
             <div className="mb-3">
               <label htmlFor="num_llaves" className="block text-sm font-medium text-gray-700">Número de llaves:</label>
               <input type="text" className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" name="num_llaves" />
@@ -191,109 +297,22 @@ const goIngresar=()=>{
 
           <input type="text" value={id} name='id' className="hidden-input" />
         </form>
+        {!comprar && (
+  <div className="mb-3">
+    <p className="text-red-500">No tienes fondos suficientes, mínimo necesitas {valor}</p>
+    <button
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3"
+      onClick={goIngresar}
+    >
+      Ingresar Dinero
+    </button>
+  </div>
+)}
       </div>
     </div>
   </div>
 </div>
-    {/* <div className="row d-flex justify-content-center mt-3">
-      <div className="col-12 col-md-8 col-lg-6">
-        <div className="border border-3 border-primary"></div>
-        <div className=" bg-white card text-dark shadow-lg">
-          <div className="card-body p-5">
-            <form className=" mb-3 mt-md-4 row" encType="multipart/form-data" onSubmit={uploadGame}>
-              <h2 className="fw-bold mb-2 text-uppercase ">Añadir Juego </h2>
-              <p className=" mb-5">Rellena todos los campos para crearlo</p>
-
-              <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="vendedor" className="form-label rounded text-dark border-dark text-decoration-underline">Nombre vendedor:</label>
-                <input type="text" className="form-control bg-secondary border-dark" value={user.username}name="vendedor" placeholder="Nombre del vendedor"/>
-              </div>
-              <div className="mb-3">
-                
-                <label htmlFor="url_portada" className="form-label rounded text-dark border-dark text-decoration-underline">Escoge una imagen de portada para tu juego:</label>
-                <input type="file" className="form-control bg-secondary border-dark" name="url_portada" />
-              </div>
-              </div>
-              <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="nombre" className="form-label rounded text-dark border-dark text-decoration-underline">Introduce el nombre del juego:</label>
-                <input type="text" className="form-control bg-secondary border-dark" name="nombre" placeholder="Nombre del juego"/>
-              </div>
-              <div className="mb-3">
-                <label htmlFor="descripcion" className="form-label rounded text-dark border-dark text-decoration-underline">Descripcion:</label>
-                <textarea type="text-field" className="form-control bg-secondary border-dark" name="descripcion" placeholder="Introduce una breve descripcion del juego"/>
-              </div>
-              </div>
-              
-            
-              <div className="mb-3">
-              <label htmlFor="plataformas" className="form-label rounded text-dark border-dark text-decoration-underline">Plataformas:</label>
-              <select className="form-select" multiple aria-label="multiple select example" name="plataformas" onChange={handlePlataformasChange}>
-                  {
-                  plataformas.map((plataforma)=>{
-                  return <option key={plataforma.id}>{plataforma.nombre}</option>})}
-              </select>
-              </div>
-              <div className="mb-3">
-              <label htmlFor="generos" className="form-label rounded text-dark border-dark text-decoration-underline">Generos:</label>
-              <select className="form-select" multiple aria-label="multiple select example" name="generos" onChange={handleGenerosChange}>
-                  {
-                  generos.map((genero)=>{
-                  return <option key={genero.id}>{genero.nombre}</option>})}
-              </select>
-              </div>     
-              <div className="mb-3">
-              <label htmlFor="idiomas" className="form-label rounded text-dark border-dark text-decoration-underline">Idiomas:</label>
-              <select className="form-select" multiple aria-label="multiple select example" name="idiomas" onChange={handleIdiomasChange}>
-                  {
-                  idiomas.map((idioma)=>{
-                  return <option key={idioma.id}>{idioma.nombre}</option>})}
-              </select>
-              </div>
-              <div className="col-md-6">
-              <div className="mb-3">
-                <label htmlFor="publicacion" className="form-label rounded text-dark border-dark text-decoration-underline">publicacion:</label>
-                <input type="date" className="form-control bg-secondary border-dark" name="publicacion" />
-              </div>
-              
-              <div className="mb-3">
-                <label htmlFor="num_llaves" className="form-label rounded text-dark border-dark text-decoration-underline">num_llaves:</label>
-                <input type="text" className="form-control bg-secondary border-dark" name="num_llaves" />
-              </div>
-              </div>
-              <div className="col-md-6">
-             
-              <div className="mb-3">
-                <label htmlFor="precio" className="form-label rounded text-dark border-dark text-decoration-underline">precio :</label>
-                <input type="text" className="form-control bg-secondary border-dark" name="precio" />
-              </div>
-                <div className="d-grid my-5">
-             
-                <button className="btn btn-outline-dark" type="submit">Crear</button>
-              </div>
-             
-             
-              <input type="text" value={id} name='id' className="hidden-input" />
-             
-              </div>
-            
-              
-            </form>
-          </div>
-        </div>
-      </div>
-    </div> */}
-    {/* {!comprar &&
-      <>
-         <div className="mb-3">
-                
-                <p>NO tienes fondos suficientes,minimo necesitas{valor}</p>
-                 <button onClick={goIngresar}>Ingresar Dinero</button>
-              </div>
-      </>
-
-    } */}
+<Footer/>
     </>
   )
 }

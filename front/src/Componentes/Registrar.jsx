@@ -3,9 +3,10 @@ import { Contexto} from "../Context/Contexto";
 import { useContext,useState ,useRef} from "react";
 import { NavLink } from "react-router-dom";
 import {Navbar} from "./Navbar"
+import { Footer } from "./Footer/Footer";
 export const Registrar = () => {
   const [nombreValido, setNombreValido] = useState(false);
-
+  const [mensajeError, setMensajeError] = useState('');
   const password1=useRef()
   const confirmPassword=useRef()
   const {Registrar}=useContext(Contexto)
@@ -17,6 +18,8 @@ export const Registrar = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
 const [emailValido, setEmailValido] = useState(false)
+const [emailTocado, setEmailTocado] = useState(false);
+
   const handleUsernameChange = (event) => {
     const value = event.target.value;
     setUsername(value);
@@ -29,6 +32,7 @@ const [emailValido, setEmailValido] = useState(false)
     setEmail(value);
     const email_valido = value.trim() !== ''; // Verifica si el campo de nombre no está vacío
     setEmailValido(email_valido);
+    setEmailTocado(true); // Establece el estado emailTocado directamente
   };
   const handlePasswordChange = (event) => {
     if (event.target.name === 'password') {
@@ -75,69 +79,94 @@ const [emailValido, setEmailValido] = useState(false)
   const handlePassword2Blur = () => {
     setCampoTocado(false);
   };
+
+  const handleRegistrar = (e) => {
+    e.preventDefault();
+  
+    // Verifica si todos los campos están vacíos
+    if (!nombreValido || !emailValido || !contraseñaSegura || coincide) {
+      setMensajeError('Por favor, asegúrate de que todos los campos estén completados correctamente.');
+    } else {
+      // Llama a la función Registrar del proveedor si todos los campos están completados correctamente
+      Registrar(e);
+      setMensajeError(''); // Limpia el mensaje de error si todo está bien
+    }
+  };
   return (
     <>
     <Navbar/>
-      <div className=" vh-100 d-flex justify-content-center align-items-center">
-  <div className="container">
-    <div className="row d-flex justify-content-center">
-      <div className="col-12 col-md-8 col-lg-6">
-        <div className="border border-3 border-primary"></div>
-        <div className="card bg-white shadow-lg">
-          <div className="card-body p-5">
-            <form  onSubmit={Registrar} className="mb-3 mt-md-4">
-              <h2 className="fw-bold mb-2 text-uppercase ">Welcome to GamesMasters</h2>
-              <p className=" mb-5">Please enter your login,password and email!</p>
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label ">Email</label>
-                <input type="text" className="form-control" name="email" placeholder="Email" onChange={handleEmailChange} />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label ">Username</label>
-                <input type="text" className="form-control" name="username" placeholder="Username"  onChange={handleUsernameChange}/>
-              </div>
-              <div className="mb-3">
-  <label htmlFor="password" className="form-label">Password</label>
-  <input type="password" className="form-control" ref={password1} name="password" placeholder="*******" onChange={handlePasswordChange} onFocus={handlePasswordFocus} onBlur={handlePasswordBlur} />
-  {campoTocado && !contraseñaSegura && (
-    <p className="text-danger">La contraseña debe tener al menos 8 caracteres.</p>
-  )}
-</div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div className="max-w-md w-full space-y-8">
+    <div>
+      <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Bienvenido a GamesMasters</h2>
+      <p className="mt-2 text-center text-sm text-gray-600">¡Por favor introduce tu correo, nombre de usuario y contraseña!</p>
+    </div>
+    <form onSubmit={handleRegistrar} className="mt-8 space-y-6">
+      <div className="rounded-md shadow-sm -space-y-px">
+        <div>
+          <label htmlFor="email" className="sr-only">Email</label>
+          <input
+  type="text"
+  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+  name="email"
+  placeholder="Email"
+  onChange={handleEmailChange}
 
-<div className="mb-3">
-  <label htmlFor="password" className="form-label">ConfirmPassword</label>
-  <input
-    type="password"
-    className="form-control"
-    ref={confirmPassword}
-    name="password2"
-    placeholder="*******"
-    onChange={handlePasswordChange}
-    onFocus={handlePassword2Focus} // Nuevo evento onFocus
-    onBlur={handlePassword2Blur} // Nuevo evento onBlur
-  />
-  {campoTocado && coincide && (
-    <p className="text-danger">Las contraseñas no coinciden.</p>
-  )}
-</div>
-              {/* <p className="small"><a className="text-primary" href="forget-password.html">Forgot password?</a></p> */}
-              <div className="d-grid">
-              <button className="btn btn-outline-dark" type="submit" disabled={coincide  ||!contraseñaSegura || !nombreValido || !emailValido}>Sing up</button>
-              </div>
-            </form>
-            <div>
-              <p className="mb-0  text-center">You have a account? 
-              <NavLink to="/login"
-                  className="text-primary fw-bold">Login</NavLink></p>
-            </div>
-
-          </div>
+/>{emailTocado && !emailValido && (
+  <p className="text-red-600 text-sm">El campo de email no puede estar vacío.</p>
+)}        </div>
+        <div>
+          <label htmlFor="username" className="sr-only">Username</label>
+          <input type="text" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" name="username" placeholder="Username" onChange={handleUsernameChange} />
+        </div>
+        <div>
+          <label htmlFor="password" className="sr-only">Password</label>
+          <input type="password" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" ref={password1} name="password" placeholder="*******" onChange={handlePasswordChange} onFocus={handlePasswordFocus} onBlur={handlePasswordBlur} />
+          {campoTocado && !contraseñaSegura && (
+            <p className="text-red-600 text-sm">La contraseña debe tener al menos 8 caracteres.</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="password" className="sr-only">ConfirmPassword</label>
+          <input
+            type="password"
+            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            ref={confirmPassword}
+            name="password2"
+            placeholder="*******"
+            onChange={handlePasswordChange}
+            onFocus={handlePassword2Focus}
+            onBlur={handlePassword2Blur}
+          />
+          {campoTocado && coincide && (
+            <p className="text-red-600 text-sm">Las contraseñas no coinciden.</p>
+          )}
         </div>
       </div>
-    </div>
+
+      <div className="flex items-center justify-between">
+        <div className="text-sm">
+          <NavLink to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            ¿Ya tienes una cuenta? Login
+          </NavLink>
+        </div>
+      </div>
+
+      <div>
+  <button
+    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    type="submit"
+  >
+    Sing up
+  </button>
+  {mensajeError && (
+    <p className="text-red-600 text-sm mt-2">{mensajeError}</p>
+  )}
+</div>
+    </form>
   </div>
 </div>
-     
+    <Footer/>
     </>
   );
 };

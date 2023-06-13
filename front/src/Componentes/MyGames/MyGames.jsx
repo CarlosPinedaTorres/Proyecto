@@ -13,8 +13,10 @@ import { Dialog, Transition } from '@headlessui/react';
 // import { motion } from "framer-motion";
 import { ImageCardMyGames } from '../PaginaP, MYgames/ImageCardMyGames';
 export const MyGames = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const navigate = useNavigate()
-  const [filasDeJuegos, setFilasDeJuegos] = useState([]);
+ 
   const [modalOpen, setModalOpen] = useState(false);
   const [wallet, setWallet] = useState()
   const [selectedOrder, setSelectedOrder] = useState('');
@@ -75,7 +77,7 @@ export const MyGames = () => {
   const [visto, setVisto] = useState(false);
   const ObtainInfoLog = async (id_user) => {
     try {
-      let response = await fetch(`http://127.0.0.1:8000/getInfoLogueado/${id_user}/`, {
+      let response = await fetch(`${apiUrl}getInfoLogueado/${id_user}/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +167,7 @@ export const MyGames = () => {
 
 
   const goStripe = () => {
-    navigate("/create-user-stripe")
+    navigate("/createuserstripe")
   }
   const goStripeMoney = () => {
     navigate("/test1")
@@ -181,120 +183,10 @@ export const MyGames = () => {
   };
   return (
     <>
-      {/* <Navbar handleModalOpen={handleModalOpen} />
-      
-      
-      <div >
-        
-      
-      <Modal open={modalOpen} onClose={handleModalClose} className="custom-modal">
-        <div className="modal-content">
-          <h3 className="modal-title text-center">Mi Modal</h3>
-      
-            <MuiButton style={{ fontSize: '18px' }} className="form-control">
-              Wallet: {myMoney}
-            </MuiButton>
-            <MuiButton  onClick={logoutUser}style={{ fontSize: '18px' }} className="form-control">
-              Logout
-            </MuiButton>
-            <MuiButton
-              style={{ fontSize: '18px' }}
-              onClick={handleMyGamesClick}
-              className="form-control"
-            >
-              My Games 
-            </MuiButton>
-            <MuiButton
-              style={{ fontSize: '18px' }}
-              onClick={goPays}
-              className="form-control"
-            >
-              Mis Pagos {visto && <span className="nuevo-indicador">●</span>}
-            </MuiButton>
-            <MuiButton
-              style={{ fontSize: '18px' }}
-              onClick={handleModalClose}
-              className="form-control"
-            >
-              Cerrar Modal
-            </MuiButton>
-          
-        </div>
-      </Modal>
-
-      </div>
-      {!account.account ? 
-  <div className="text-center d-flex flex-column align-items-center">
-  <p className="text-white mt-5 mb-0">Debes proporcionarnos información adicional para poder crear juegos.</p>
-  <div className="d-flex justify-content-center">
-    <Button className="filter-toggle text-white mt-3" onClick={goStripe} variant="danger">
-      Crear cuenta de Stripe
-    </Button>
-  </div>
-  
-</div>: (
-    <div className='d-flex justify-content-center w-10 ' >
-    {myGamesUser.length>0&&
-      <Button className="filter-toggle d-flex justify-content-center text-white" variant="danger" onClick={handleToggleFilter}>
-        {showFilter? 'Ocultar filtros' : 'Mostrar filtros'}
-      </Button>
-}
-      <Button className="filter-toggle d-flex justify-content-center text-white mx-4" variant="danger" onClick={createGame}>
-        Crear Juego
-      </Button>
-      <Button className="filter-toggle d-flex justify-content-center text-white " variant="danger" onClick={goStripeMoney}>
-        Ingresar dinero
-      </Button>
-      </div>)}
-
-      {!account.account? null : (
-  <div className="container py-5 text-white d-flex align-items-center justify-content-center">
-  <Row>
-    {showFilter && (
-      <Col md={2} className={`${showFilter ? 'filter-color' : ''} vh-100 w-10`}>
-        <div style={{ overflow: 'auto', maxHeight: '100%' }}>
-        <GameFilter showFilter={showFilter} handleOrderChange={handleOrderChange}
-        handleGenreSelection={handleGenreSelection}
-        selectedGenre={selectedGenre} handleIdiomSelection={handleIdiomSelection}
-        selectedIdiom={selectedIdiom} handlePlataformaSelection={handlePlataformaSelection} selectedPlataforma={selectedPlataforma}/>
-        </div>
-      </Col>
-    )}
-    <Col md={9} className={`align-items-center ${colWidth}`}>
-      {filasDeJuegos.map((fila, index) => (
-        <Row xs={1} md={2} lg={3} xl={4} xxl={5} className="g-4 align-items-center  ">
-          {fila.map((imagen) => (
-            <Col xs={12} md={4} key={imagen.nombre}>
-              <Card className="mb-3 h-100 game-card">
-                <Card.Img
-                  variant="top"
-                  src={`http://localhost:8000/${imagen.url_portada}`}
-                  className="game-image"
-                />
-                <Card.Body>
-                  <Card.Title className="game-name">{imagen.nombre}</Card.Title>
-                  <Card.Text className="game-price">{imagen.precio}</Card.Text>
-                  <Link to={`http://localhost:5173/edit/${imagen.id}`}>
-                    Editar ||
-                  </Link>  <Link to={`http://localhost:5173/edit/${imagen.id}`}>
-                    Eliminar Oferta
-                  </Link>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ))}
-    </Col>
-  </Row>
-</div>)}
-      
-
-  
-  <Footer /> */}
+     
 
 <div className="flex flex-col min-h-screen">
-<Navbar handleModalOpen={handleModalOpen} />
+<Navbar handleModalOpen={handleModalOpen} visto={visto} />
 
   <div className="mt-4">
         <div className="w-full flex justify-center">
@@ -316,14 +208,7 @@ export const MyGames = () => {
       ) : (
         <div className="ml-4">
           <div className="flex space-x-4">
-            {myGamesUser.length > 0 && (
-              <button
-                className="bg-red-600 text-white px-4 py-2 rounded-md"
-                onClick={handleToggleFilter}
-              >
-                {showFilter ? "Ocultar filtros" : "Mostrar filtros"}
-              </button>
-            )}
+            
             <button
               className="bg-red-600 text-white px-4 py-2 rounded-md"
               onClick={createGame}
@@ -352,13 +237,33 @@ export const MyGames = () => {
           handlePlataformaSelection={handlePlataformaSelection}
           selectedPlataforma={selectedPlataforma}
         >
-            {juegos && <ImageCardMyGames imageInfo={juegos} />}
+            {juegos.length>0 ? <ImageCardMyGames imageInfo={juegos} />:    <div className="min-h-screen flex items-center justify-center">
+  <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-6">
+    <div className="flex items-center justify-center text-red-500">
+      <i className="fas fa-exclamation-circle text-3xl"></i>
+    </div>
+    <h1 className="mt-4 text-center font-semibold text-xl text-gray-800">No hay juegos disponibles</h1>
+  </div>
+</div>}
           </SidebarMenu>
         </div>
       </div>
       <div className="flex flex-col flex-grow"> 
       
-      {!sidebarOpen && juegos && <ImageCardMyGames imageInfo={juegos} />}
+      {!sidebarOpen && (
+  juegos.length > 0 ? (
+    <ImageCardMyGames imageInfo={juegos} />
+  ) : (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-6">
+        <div className="flex items-center justify-center text-red-500">
+          <i className="fas fa-exclamation-circle text-3xl"></i>
+        </div>
+        <h1 className="mt-4 text-center font-semibold text-xl text-gray-800">No hay juegos disponibles</h1>
+      </div>
+    </div>
+  )
+)}
       </div>
       <Transition appear show={modalOpen} as={React.Fragment}>
       <Dialog
@@ -385,17 +290,23 @@ export const MyGames = () => {
                 </MuiButton>
               ) : (
                 <MuiButton className="w-full mb-2 text-lg" style={{ fontSize: '18px' }} onClick={goStripe}>
-                  Crear user en stripe
+                  Crear user en stripee
                 </MuiButton>
               )}
               <MuiButton onClick={()=>goPays()} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
-                Mis pagos
+              Mis Pagos
+                {visto && (
+                  <span className="ml-2 bg-red-500 text-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    ●
+                  </span>
+                )}
+              </MuiButton>
+           
+              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
+                My Games
               </MuiButton>
               <MuiButton onClick={logoutUser} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Logout
-              </MuiButton>
-              <MuiButton onClick={handleMyGamesClick} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
-                My Games
               </MuiButton>
               <MuiButton onClick={handleModalClose} className="w-full mb-2 text-lg" style={{ fontSize: '18px' }}>
                 Cerrar Modal
@@ -410,97 +321,8 @@ export const MyGames = () => {
       <Footer />
       
       </div>
-      {/* {!account.account ? (
-        <div className="text-center d-flex flex-column align-items-center">
-          <p className="text-white mt-5 mb-0">Debes proporcionarnos información adicional para poder crear juegos.</p>
-          <div className="d-flex justify-content-center">
-            <button className="btn btn-danger text-white mt-3" onClick={goStripe}>
-              Crear cuenta de Stripe
-            </button>
-          </div>
-        </div>
-      ) : (
-
-        <div className="button-container mx-auto mt-4 pt-3" style={{ maxWidth: '600px' }}>
-          <ButtonGroup className="d-flex justify-content-center w-100">
-            {myGamesUser.length > 0 && (
-              <Button variant="danger" className="filter-toggle text-white" onClick={handleToggleFilter}>
-                {showFilter ? 'Ocultar filtros' : 'Mostrar filtros'}
-              </Button>
-            )}
-            <Button variant="danger" className="filter-toggle text-white mx-4" onClick={createGame}>
-              Crear Juego
-            </Button>
-            <Button variant="danger" className="filter-toggle text-white" onClick={goStripeMoney}>
-              Ingresar dinero
-            </Button>
-          </ButtonGroup>
-        </div>
-
-      )}
-
-      {!account.account ? null : (
-        <div className="container py-5 text-white d-flex align-items-center justify-content-center">
-        <Row>
-          {showFilter && (
-            <Col md={2} className={`${showFilter ? "filter-color" : ""} vh-100 w-10`}>
-              <div style={{ overflow: "auto", maxHeight: "100%" }}>
-                <GameFilter
-                  showFilter={showFilter}
-                  handleOrderChange={handleOrderChange}
-                  handleGenreSelection={handleGenreSelection}
-                  selectedGenre={selectedGenre}
-                  handleIdiomSelection={handleIdiomSelection}
-                  selectedIdiom={selectedIdiom}
-                  handlePlataformaSelection={handlePlataformaSelection}
-                  selectedPlataforma={selectedPlataforma}
-                />
-              </div>
-            </Col>
-          )}
-          <Col md={9} className={`align-items-center`}>
-            {filasDeJuegos.map((fila, index) => (
-              <Row xs={1} md={2} lg={3} xl={4} xxl={5} className="g-4 align-items-stretch" key={index}>
-                {fila.map((imagen) => (
-                  <Col xs={12} sm={6} md={4} lg={3} key={imagen.nombre} className="mb-4">
-                    <motion.div whileHover={{ scale: 1.1 }} className="card h-100 game-card">
-                      <div className="card-horizontal">
-                        <div className="img-square-wrapper">
-                          <motion.img
-                            src={`http://localhost:8000/${imagen.url_portada}`}
-                            className="img-fluid game-image"
-                            alt={imagen.nombre}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                          />
-                        </div>
-                        <div className="card-body d-flex flex-column justify-content-between">
-                          <h5 className="card-title game-name custom-title">{imagen.nombre}</h5>
-                          <div className="d-flex justify-content-between">
-                            <p className="card-text game-price custom-price">{imagen.precio}</p>
-                            <div className="text-right">
-                              <div className="card-buttons">
-                                <Link to={`http://localhost:5173/edit/${imagen.id}`} className="btn custom-button">
-                                  Editar
-                                </Link>
-                                <Link to={`http://localhost:5173/edit/${imagen.id}`} className="btn custom-button">
-                                  Eliminar
-                                </Link>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Col>
-                ))}
-              </Row>
-            ))}
-          </Col>
-        </Row>
-      </div>
-      )} */} 
+     
+ 
 
 
     </>

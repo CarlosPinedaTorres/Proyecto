@@ -21,4 +21,5 @@ Este proyecto se trata de un proyecto para final de grado de Carlos Pineda Torre
 3. Ejecuta un make django-migrate-games
 4. Ejecuta un make django-migrate
 5. En ese mismo orden en caso de error borra la base de datos y vuelve a levantar el contenedor y ejecutar los make
-6. Accede a la aplicación por defecto desde http://localhost:8000 (Servidor) http://localhost:5173 (Cliente).
+6. Usa el make terminal-servidorweb y dentro crea un super usuario con python manage.py createsuperuser.
+8. Accede a la aplicación por defecto desde http://localhost:8000 (Servidor) http://localhost:5173 (Cliente).

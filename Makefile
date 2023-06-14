@@ -3,9 +3,10 @@ start:
 	docker compose up -d --build
 stop:
 	docker compose down
-django-migrate:
+django-migrate-users:
 	docker exec -it servidorweb python manage.py makemigrations users
 	docker exec -it servidorweb python manage.py migrate users
+django-migrate-games:
 	docker exec -it servidorweb python manage.py makemigrations games
 	docker exec -it servidorweb python manage.py migrate games
 terminal-servidorweb:

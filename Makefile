@@ -9,6 +9,9 @@ django-migrate-users:
 django-migrate-games:
 	docker exec -it servidorweb python manage.py makemigrations games
 	docker exec -it servidorweb python manage.py migrate games
+django-migrate:
+	docker exec -it servidorweb python manage.py makemigrations
+	docker exec -it servidorweb python manage.py migrate
 terminal-servidorweb:
 	docker exec -it servidorweb /bin/bash
 lsresources:
